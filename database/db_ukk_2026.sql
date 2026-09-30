@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 23, 2026 at 07:28 AM
+-- Generation Time: Sep 30, 2026 at 02:52 AM
 -- Server version: 10.4.25-MariaDB
 -- PHP Version: 8.0.23
 
@@ -42,17 +42,18 @@ CREATE TABLE `t_guru` (
 -- Dumping data for table `t_guru`
 --
 
-INSERT INTO `t_guru` (`id`, `nip`, `nama`, `email`, `status_aktif`, `user_id`, `created_at`, `updated_at`) VALUES
-(1, '1980101001', 'Agus Setiawan', 'guru1@sekolah.sch.id', 1, 1, '2026-09-23 02:38:24', '2026-09-23 02:38:24'),
-(2, '1980201001', 'Dewi Lestari', 'guru2@sekolah.sch.id', 1, 2, '2026-09-23 02:38:24', '2026-09-23 02:38:24'),
-(3, '1980301001', 'Rudi Hartono', 'guru3@sekolah.sch.id', 1, 3, '2026-09-23 02:38:24', '2026-09-23 02:38:24'),
-(4, '1980401001', 'Siti Aminah', 'guru4@sekolah.sch.id', 1, 4, '2026-09-23 02:38:24', '2026-09-23 02:38:24'),
-(5, '1980501001', 'Yudi Pratama', 'guru5@sekolah.sch.id', 1, 5, '2026-09-23 02:38:24', '2026-09-23 02:38:24'),
-(6, '1980601001', 'Nina Kurnia', 'guru6@sekolah.sch.id', 1, 6, '2026-09-23 02:38:24', '2026-09-23 02:38:24'),
-(7, '1980701001', 'Bambang Saputra', 'guru7@sekolah.sch.id', 1, 7, '2026-09-23 02:38:24', '2026-09-23 02:38:24'),
-(8, '1980801001', 'Rina Marlina', 'guru8@sekolah.sch.id', 1, 8, '2026-09-23 02:38:24', '2026-09-23 02:38:24'),
-(9, '1980901001', 'Heri Gunawan', 'guru9@sekolah.sch.id', 1, 9, '2026-09-23 02:38:24', '2026-09-23 02:38:24'),
-(10, '1981001001', 'Tina Permata', 'guru10@sekolah.sch.id', 1, 10, '2026-09-23 02:38:24', '2026-09-23 02:38:24');
+INSERT INTO `t_users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `role`, `created_at`, `updated_at`) VALUES
+(1, 'Agus Setiawan', 'guru1@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(2, 'Dewi Lestari', 'guru2@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(3, 'Rudi Hartono', 'guru3@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(4, 'Siti Aminah', 'guru4@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(5, 'Yudi Pratama', 'guru5@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(6, 'Nina Kurnia', 'guru6@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(7, 'Bambang Saputra', 'guru7@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(8, 'Rina Marlina', 'guru8@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(9, 'Heri Gunawan', 'guru9@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(10, 'Tina Permata', 'guru10@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(11, 'Administrator', 'admin@gmail.com', '2026-01-01 01:00:00', '$2y$10$58TDXYEi0KPrIMgJPYB5OOv8UOHdjfdA23f9JqzxVCNnnojFWCHAm', '', 'admin', '2026-09-23 02:37:22', '2026-09-23 02:37:22');
 
 -- --------------------------------------------------------
 
@@ -430,17 +431,17 @@ CREATE TABLE `t_users` (
 --
 
 INSERT INTO `t_users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `role`, `created_at`, `updated_at`) VALUES
-(1, 'Agus Setiawan', 'guru1@sekolah.sch.id', '2026-01-01 01:00:00', '$2y$12$IfxTL4nwxIhe/isU/eURbumiUNP1Sz9K2el0HuMJDGtwwj8smT1IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(2, 'Dewi Lestari', 'guru2@sekolah.sch.id', '2026-01-01 01:00:00', '$2y$12$IfxTL4nwxIhe/isU/eURbumiUNP1Sz9K2el0HuMJDGtwwj8smT1IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(3, 'Rudi Hartono', 'guru3@sekolah.sch.id', '2026-01-01 01:00:00', '$2y$12$IfxTL4nwxIhe/isU/eURbumiUNP1Sz9K2el0HuMJDGtwwj8smT1IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(4, 'Siti Aminah', 'guru4@sekolah.sch.id', '2026-01-01 01:00:00', '$2y$12$IfxTL4nwxIhe/isU/eURbumiUNP1Sz9K2el0HuMJDGtwwj8smT1IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(5, 'Yudi Pratama', 'guru5@sekolah.sch.id', '2026-01-01 01:00:00', '$2y$12$IfxTL4nwxIhe/isU/eURbumiUNP1Sz9K2el0HuMJDGtwwj8smT1IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(6, 'Nina Kurnia', 'guru6@sekolah.sch.id', '2026-01-01 01:00:00', '$2y$12$IfxTL4nwxIhe/isU/eURbumiUNP1Sz9K2el0HuMJDGtwwj8smT1IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(7, 'Bambang Saputra', 'guru7@sekolah.sch.id', '2026-01-01 01:00:00', '$2y$12$IfxTL4nwxIhe/isU/eURbumiUNP1Sz9K2el0HuMJDGtwwj8smT1IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(8, 'Rina Marlina', 'guru8@sekolah.sch.id', '2026-01-01 01:00:00', '$2y$12$IfxTL4nwxIhe/isU/eURbumiUNP1Sz9K2el0HuMJDGtwwj8smT1IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(9, 'Heri Gunawan', 'guru9@sekolah.sch.id', '2026-01-01 01:00:00', '$2y$12$IfxTL4nwxIhe/isU/eURbumiUNP1Sz9K2el0HuMJDGtwwj8smT1IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(10, 'Tina Permata', 'guru10@sekolah.sch.id', '2026-01-01 01:00:00', '$2y$12$IfxTL4nwxIhe/isU/eURbumiUNP1Sz9K2el0HuMJDGtwwj8smT1IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(11, 'Administrator', 'admin@sekolah.sch.id', '2026-01-01 01:00:00', '$2y$12$IfxTL4nwxIhe/isU/eURbumiUNP1Sz9K2el0HuMJDGtwwj8smT1IG', '', 'admin', '2026-09-23 02:37:22', '2026-09-23 02:37:22');
+(1, 'Agus Setiawan', 'guru1@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(2, 'Dewi Lestari', 'guru2@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(3, 'Rudi Hartono', 'guru3@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(4, 'Siti Aminah', 'guru4@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(5, 'Yudi Pratama', 'guru5@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(6, 'Nina Kurnia', 'guru6@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(7, 'Bambang Saputra', 'guru7@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(8, 'Rina Marlina', 'guru8@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(9, 'Heri Gunawan', 'guru9@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(10, 'Tina Permata', 'guru10@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
+(11, 'Administrator', 'admin@gmail.com', '2026-01-01 01:00:00', '$2y$10$58TDXYEi0KPrIMgJPYB5OOv8UOHdjfdA23f9JqzxVCNnnojFWCHAm', '', 'admin', '2026-09-23 02:37:22', '2026-09-23 02:37:22');
 
 -- --------------------------------------------------------
 
