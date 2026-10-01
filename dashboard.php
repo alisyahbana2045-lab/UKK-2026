@@ -26,6 +26,25 @@ require_once "config/session.php";
         color: white;
         background-color: #0d6efd;
     }
+
+    .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    z-index: 1000;
+    }
+
+    .main-content {
+    margin-left: 16.666667%;
+    }
+
+    @media (max-width: 991.98px) {
+        .main-content {
+            margin-left: 25%;
+        }
+    }
 </style>
 </head>
 
@@ -36,94 +55,14 @@ require_once "config/session.php";
     <div class="row">
 
         <!-- SIDEBAR -->
-        <div class="col-md-3 col-lg-2 bg-dark min-vh-100 p-3">
+         <div class="col-md-3 col-lg-2 sidebar">
 
-            <h4 class="text-white mb-4">
-                SMK MUHAMMADIYAH
-            </h4>
-            <hr class="text-secondary">
+            <?php require_once "layout/sidebar.php"; ?>
 
-    <?php if ($_SESSION['user_role'] == 'admin') { ?>
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item mb-2">
-                    <a href="admin/menu1/" class="nav-link menu-sidebar ">
-                        Dashboard
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="admin/menu1/" class="nav-link menu-sidebar ">
-                        Data Siswa
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="admin/menu2" class="nav-link menu-sidebar">
-                        Data Guru
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="admin/menu3" class="nav-link menu-sidebar">
-                        Kelas
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="admin/menu4" class="nav-link menu-sidebar">
-                        Laporan
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="about.php" class="nav-link menu-sidebar">
-                        About
-                    </a>
-                <hr class="text-secondary">
-
-                <li class="nav-item">
-                    <a href="logout.php" class="nav-link text-danger">
-                        Logout
-                    </a>
-                </li>
-            </ul>
-
-    <?php } elseif ($_SESSION['user_role'] == 'guru') { ?>
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item mb-2">
-                    <a href="#" class="nav-link menu-sidebar">
-                        Dashboard
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="guru/menu3/index.php" class="nav-link menu-sidebar">
-                        Menu 3
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="guru/menu4/index.php" class="nav-link menu-sidebar">
-                        Menu 4
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="guru/menu5/index.php" class="nav-link menu-sidebar">
-                        Menu 5
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="about.php" class="nav-link menu-sidebar">
-                        About 
-                    </a>
-                </li>
-                <hr class="text-secondary">
-
-                <li class="nav-item">
-                    <a href="logout.php" class="nav-link text-danger">
-                        Logout
-                    </a>
-                </li>
-            </ul>
-        <?php } ?>
         </div>
 
-
         <!-- KONTEN -->
-        <main class="col-md-9 col-lg-10 p-4">
+        <main class="col-md-9 col-lg-10 p-4 main-content">
 
 
     <h2>Sistem Pelanggaran Siswa</h2>
@@ -150,14 +89,16 @@ require_once "config/session.php";
                 <div class="col-md-4 mb-3">
                     <div class="card shadow-sm">
 
-                        <div class="card-body">
+                        <div class="card-body ">
 
                             <h5 class="card-title">
                                 Data Siswa
                             </h5>
 
                             <h2>
-                                <button type="submit" class="btn btn-outline-success ">Lihat</button>
+                                <a href="admin/kelola_siswa/index.php">
+                                    <button type="submit" class="btn btn-outline-success ">Lihat</button>
+                                </a>
                             </h2>
 
                         </div>

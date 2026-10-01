@@ -22,7 +22,7 @@ if (isset($_SESSION['user_id'])) {
 
 
 <div class="container-fluid min-vh-100 d-flex justify-content-center align-items-center" "
-style="background-color: #4b9eaa;">
+style="background-color: #00A1DB;">
 
 <div class="card p-4 shadow" style="width: 350px;">
 
