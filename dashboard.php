@@ -5,154 +5,351 @@ require_once "config/session.php";
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="id">
 
 <head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Dashboard - Sistem Pelanggaran Siswa</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+        crossorigin="anonymous"
+    >
+
     <style>
-    .menu-sidebar {
-        color: white;
-        background-color: transparent;
-        transition: 0.3s;
-    }
 
-    .menu-sidebar:hover {
-        color: white;
-        background-color: #0d6efd;
-    }
+        /* SIDEBAR */
 
-    .menu-sidebar.active {
-        color: white;
-        background-color: #0d6efd;
-    }
-
-    .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    overflow-y: auto;
-    z-index: 1000;
-    }
-
-    .main-content {
-    margin-left: 16.666667%;
-    }
-
-    @media (max-width: 991.98px) {
-        .main-content {
-            margin-left: 25%;
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 1000;
         }
-    }
-</style>
+
+
+        /* MENU SIDEBAR */
+
+        .menu-sidebar {
+            color: white;
+            background-color: transparent;
+            transition: 0.3s;
+        }
+
+        .menu-sidebar:hover {
+            color: white;
+            background-color: #0d6efd;
+        }
+
+        .menu-sidebar.active {
+            color: white;
+            background-color: #0d6efd;
+        }
+
+
+        /* KONTEN */
+
+        .main-content {
+            margin-left: 16.666667%;
+            padding: 30px;
+        }
+
+
+        /* WELCOME */
+
+        .welcome-card {
+            border: none;
+            border-radius: 12px;
+            background-color: #00A1DB;;
+            color: white;
+        }
+
+
+        /* CARD DATA */
+
+        .data-card {
+            border: none;
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+
+        .data-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+        }
+
+        .data-card .card-body {
+            padding: 25px;
+        }
+
+
+        /* ICON */
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background-color: #e7f1ff;
+            color: #0d6efd;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+
+        /* BUTTON */
+
+        .btn {
+            border-radius: 8px;
+        }
+
+
+        /* RESPONSIVE */
+
+        @media (max-width: 991.98px) {
+
+            .main-content {
+                margin-left: 25%;
+            }
+
+        }
+
+    </style>
+
 </head>
 
+
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
-    <div class="container-fluid">
+
+<div class="container-fluid">
+
     <div class="row">
 
+
         <!-- SIDEBAR -->
-         <div class="col-md-3 col-lg-2 sidebar">
+
+        <div class="col-md-3 col-lg-2 sidebar">
 
             <?php require_once "layout/sidebar.php"; ?>
 
         </div>
 
+
         <!-- KONTEN -->
+
         <main class="col-md-9 col-lg-10 p-4 main-content">
 
 
-    <h2>Sistem Pelanggaran Siswa</h2>
-    <hr>
+            <!-- HEADER -->
 
-    <p>
-        Selamat Datang,
-        <strong><?php echo $_SESSION['user_name']; ?></strong>
-    </p>
-    <p>
-        Anda Login Sebagai:
-        <strong><?php echo $_SESSION['user_role']; ?></strong>
-    </p>
+            <div class="mb-4">
 
-            <div class="row">
+                <h2 class="fw-bold mb-1">
+                    Dashboard
+                </h2>
 
+                <p class="text-muted mb-0">
+                    Sistem Pelanggaran Siswa
+                </p>
 
-            <?php if ($_SESSION['user_role'] == 'admin') {
-                echo "";
-            } else {
-                echo ""; } ?>
-
-                <!-- CARD DATA SISWA -->
-                <div class="col-md-4 mb-3">
-                    <div class="card shadow-sm">
-
-                        <div class="card-body ">
-
-                            <h5 class="card-title">
-                                Data Siswa
-                            </h5>
-
-                            <h2>
-                                <a href="admin/kelola_siswa/index.php">
-                                    <button type="submit" class="btn btn-outline-success ">Lihat</button>
-                                </a>
-                            </h2>
-
-                        </div>
-
-                    </div>
-                </div>
+            </div>
 
 
-                <!-- CARD DATA GURU -->
-                <div class="col-md-4 mb-3">
-                    <div class="card shadow-sm">
+            <!-- WELCOME -->
 
-                        <div class="card-body">
+            <div class="card welcome-card shadow-sm mb-4">
 
-                            <h5 class="card-title">
-                                Data Guru
-                            </h5>
+                <div class="card-body p-4">
 
-                            <h2>
-                                <button type="submit" class="btn btn-outline-success ">Lihat</button>
-                            </h2>
+                    <h4 class="fw-bold mb-2">
+                        Selamat Datang,
+                        <?php echo htmlspecialchars($_SESSION['user_name']); ?>!
+                    </h4>
 
-                        </div>
+                    <p class="mb-0">
 
-                    </div>
-                </div>
+                        Anda login sebagai
 
+                        <span class="badge bg-light text-primary">
+                            <?php echo htmlspecialchars($_SESSION['user_role']); ?>
+                        </span>
 
-                <!-- CARD KELAS -->
-                <div class="col-md-4 mb-3">
-                    <div class="card shadow-sm">
+                    </p>
 
-                        <div class="card-body">
-
-                            <h5 class="card-title">
-                                Kelas
-                            </h5>
-
-                            <h2>
-                                <button type="submit" class="btn btn-outline-success ">Lihat</button>
-                            </h2>
-
-                        </div>
-
-                    </div>
                 </div>
 
             </div>
 
+
+            <!-- DATA CARD -->
+
+            <div class="row">
+
+
+                <!-- DATA SISWA -->
+
+                <div class="col-md-4 mb-4">
+
+                    <div class="card data-card shadow-sm h-100">
+
+                        <div class="card-body">
+
+                            <div class="d-flex align-items-center mb-3">
+
+                                <div class="card-icon me-3">
+                                    S
+                                </div>
+
+                                <div>
+
+                                    <h5 class="card-title fw-bold mb-1">
+                                        Data Siswa
+                                    </h5>
+
+                                    <small class="text-muted">
+                                        Kelola data siswa
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                            <p class="text-muted">
+                                Tambah, edit, dan kelola data siswa yang terdaftar.
+                            </p>
+
+                            <a
+                                href="admin/kelola_siswa/index.php"
+                                class="btn btn-primary"
+                            >
+                                Lihat Data
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DATA GURU -->
+
+                <div class="col-md-4 mb-4">
+
+                    <div class="card data-card shadow-sm h-100">
+
+                        <div class="card-body">
+
+                            <div class="d-flex align-items-center mb-3">
+
+                                <div class="card-icon me-3">
+                                    G
+                                </div>
+
+                                <div>
+
+                                    <h5 class="card-title fw-bold mb-1">
+                                        Data Guru
+                                    </h5>
+
+                                    <small class="text-muted">
+                                        Kelola data guru
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                            <p class="text-muted">
+                                Tambah, edit, dan kelola data guru sekolah.
+                            </p>
+
+                            <a
+                                href="admin/kelola_guru/index.php"
+                                class="btn btn-primary"
+                            >
+                                Lihat Data
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- DATA KELAS -->
+
+                <div class="col-md-4 mb-4">
+
+                    <div class="card data-card shadow-sm h-100">
+
+                        <div class="card-body">
+
+                            <div class="d-flex align-items-center mb-3">
+
+                                <div class="card-icon me-3">
+                                    K
+                                </div>
+
+                                <div>
+
+                                    <h5 class="card-title fw-bold mb-1">
+                                        Data Kelas
+                                    </h5>
+
+                                    <small class="text-muted">
+                                        Kelola data kelas
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                            <p class="text-muted">
+                                Kelola data kelas dan informasi pembagian kelas.
+                            </p>
+
+                            <a
+                                href="admin/kelola_kelas/index.php"
+                                class="btn btn-primary"
+                            >
+                                Lihat Data
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
         </main>
 
     </div>
+
 </div>
 
+
+<!-- Bootstrap JS -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js">
+</script>
 
 </body>
 

@@ -38,6 +38,17 @@ CREATE TABLE `t_guru` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+INSERT INTO t_guru (nip, nama, email, status_aktif, user_id, created_at, updated_at) VALUES
+('198501012010011001', 'Agus Setiawan', 'guru1@gmail.com', 1, 1, NOW(), NOW()),
+('198602152011012002', 'Dewi Lestari', 'guru2@gmail.com', 1, 2, NOW(), NOW()),
+('198703202012021003', 'Rudi Hartono', 'guru3@gmail.com', 1, 3, NOW(), NOW()),
+('198804102013031004', 'Siti Aminah', 'guru4@gmail.com', 1, 4, NOW(), NOW()),
+('198905252014041005', 'Yudi Pratama', 'guru5@gmail.com', 1, 5, NOW(), NOW()),
+('199006122015051006', 'Nina Kurnia', 'guru6@gmail.com', 1, 6, NOW(), NOW()),
+('199107182016061007', 'Bambang Saputra', 'guru7@gmail.com', 1, 7, NOW(), NOW()),
+('199208302017071008', 'Rina Marlina', 'guru8@gmail.com', 1, 8, NOW(), NOW()),
+('199309142018081009', 'Heri Gunawan', 'guru9@gmail.com', 1, 9, NOW(), NOW()),
+('199410052019091010', 'Tina Permata', 'guru10@gmail.com', 1, 10, NOW(), NOW());
 --
 -- Dumping data for table `t_guru`
 --

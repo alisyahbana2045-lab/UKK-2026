@@ -1,7 +1,7 @@
 <?php
 
-require_once "../../config/admin.php";
-require_once "../../config/koneksi.php";
+require_once __DIR__ . "/../../config/admin.php";
+require_once __DIR__ . "/../../config/koneksi.php";
 
 if (isset($_POST['simpan'])) {
 
@@ -41,7 +41,82 @@ if (isset($_POST['simpan'])) {
 
     <meta charset="UTF-8">
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Tambah Siswa</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .main-content {
+            margin-left: 16.666667%;
+            padding: 30px;
+        }
+
+        .menu-sidebar {
+            color: white;
+            background-color: transparent;
+            transition: 0.3s;
+        }
+
+        .menu-sidebar:hover,
+        .menu-sidebar.active {
+            color: white;
+            background-color: #0d6efd;
+        }
+
+        .form-card {
+            border: none;
+            border-radius: 12px;
+        }
+
+        .form-card .card-header {
+            background-color: #00A1DB;
+            color: white;
+            border-radius: 12px 12px 0 0;
+            padding: 18px 22px;
+        }
+
+        .form-card .card-body {
+            padding: 25px;
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+        }
+
+        .btn {
+            border-radius: 8px;
+            padding: 9px 18px;
+        }
+
+    </style>
 
 </head>
 
@@ -62,140 +137,213 @@ if (isset($_POST['simpan'])) {
 
         <!-- KONTEN -->
 
-        <td valign="top">
+        <td class="col-md-9 col-lg-10 p-4 main-content">
 
-            <h1>Tambah Siswa</h1>
+            <!-- JUDUL -->
 
-            <form method="POST">
+            <div class="mb-4">
 
-                <table>
+                <h1 class="fw-bold mb-1">
+                    Tambah Siswa
+                </h1>
 
-                    <tr>
+                <p class="text-muted mb-0">
+                    Tambahkan data siswa baru ke dalam sistem.
+                </p>
 
-                        <td>NIS</td>
+            </div>
 
-                        <td>
-                            <input type="text" name="nis" required>
-                        </td>
 
-                    </tr>
+            <!-- FORM -->
 
-                    <tr>
+            <div class="card shadow-sm form-card">
 
-                        <td>NISN</td>
+                <div class="card-header">
 
-                        <td>
-                            <input type="text" name="nisn" required>
-                        </td>
+                    <h5 class="mb-0">
+                        Form Data Siswa
+                    </h5>
 
-                    </tr>
+                </div>
 
-                    <tr>
 
-                        <td>Nama</td>
+                <div class="card-body">
 
-                        <td>
-                            <input type="text" name="nama" required>
-                        </td>
+                    <form method="POST">
 
-                    </tr>
+                        <div class="row">
 
-                    <tr>
+                            <!-- NIS -->
 
-                        <td>Jenis Kelamin</td>
+                            <div class="col-md-6 mb-3">
 
-                        <td>
+                                <label class="form-label">
+                                    NIS
+                                </label>
 
-                            <select name="jenis_kelamin" required>
+                                <input
+                                    type="text"
+                                    name="nis"
+                                    class="form-control"
+                                    placeholder="Masukkan NIS"
+                                    required
+                                >
 
-                                <option value="">
-                                    -- Pilih --
-                                </option>
+                            </div>
 
-                                <option value="L">
-                                    Laki-laki
-                                </option>
 
-                                <option value="P">
-                                    Perempuan
-                                </option>
+                            <!-- NISN -->
 
-                            </select>
+                            <div class="col-md-6 mb-3">
 
-                        </td>
+                                <label class="form-label">
+                                    NISN
+                                </label>
 
-                    </tr>
+                                <input
+                                    type="text"
+                                    name="nisn"
+                                    class="form-control"
+                                    placeholder="Masukkan NISN"
+                                    required
+                                >
 
-                    <tr>
+                            </div>
 
-                        <td>Tanggal Lahir</td>
 
-                        <td>
-                            <input type="date" name="tanggal_lahir" required>
-                        </td>
+                            <!-- NAMA -->
 
-                    </tr>
+                            <div class="col-md-12 mb-3">
 
-                    <tr>
+                                <label class="form-label">
+                                    Nama Lengkap
+                                </label>
 
-                        <td>Alamat</td>
+                                <input
+                                    type="text"
+                                    name="nama"
+                                    class="form-control"
+                                    placeholder="Masukkan nama lengkap siswa"
+                                    required
+                                >
 
-                        <td>
-                            <textarea name="alamat" required></textarea>
-                        </td>
+                            </div>
 
-                    </tr>
 
-                    <tr>
+                            <!-- JENIS KELAMIN -->
 
-                        <td>Status</td>
+                            <div class="col-md-6 mb-3">
 
-                        <td>
+                                <label class="form-label">
+                                    Jenis Kelamin
+                                </label>
 
-                            <select name="status_aktif" required>
+                                <select
+                                    name="jenis_kelamin"
+                                    class="form-select"
+                                    required
+                                >
 
-                                <option value="1">
-                                    Aktif
-                                </option>
+                                    <option value="">
+                                        -- Pilih Jenis Kelamin --
+                                    </option>
 
-                                <option value="0">
-                                    Tidak Aktif
-                                </option>
+                                    <option value="L">
+                                        Laki-laki
+                                    </option>
 
-                            </select>
+                                    <option value="P">
+                                        Perempuan
+                                    </option>
 
-                        </td>
+                                </select>
 
-                    </tr>
+                            </div>
 
-                    <tr>
 
-                        <td></td>
+                            <!-- TANGGAL LAHIR -->
 
-                        <td>
+                            <div class="col-md-6 mb-3">
 
-                            <button type="submit" name="simpan">
+                                <label class="form-label">
+                                    Tanggal Lahir
+                                </label>
+
+                                <input
+                                    type="date"
+                                    name="tanggal_lahir"
+                                    class="form-control"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <!-- ALAMAT -->
+
+                            <div class="col-md-12 mb-3">
+
+                                <label class="form-label">
+                                    Alamat
+                                </label>
+
+                                <textarea name="alamat" class="form-control" rows="4" placeholder="Masukkan alamat lengkap siswa" required>
+                                </textarea>
+
+                            </div>
+
+
+                            <!-- STATUS -->
+
+                            <div class="col-md-6 mb-4">
+
+                                <label class="form-label">
+                                    Status Siswa
+                                </label>
+
+                                <select name="status_aktif" class="form-select" required>
+
+                                    <option value="1">
+                                        Aktif
+                                    </option>
+
+                                    <option value="0">
+                                        Tidak Aktif
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- TOMBOL -->
+
+                        <div class="d-flex gap-2">
+
+                            <button type="submit" name="simpan" class="btn btn-primary">
                                 Simpan
                             </button>
 
-                            <a href="index.php">
+                            <a href="index.php" class="btn btn-secondary">
                                 Kembali
                             </a>
 
-                        </td>
+                        </div>
 
-                    </tr>
+                    </form>
 
-                </table>
+                </div>
 
-            </form>
+            </div>
 
         </td>
 
     </tr>
 
 </table>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
-
 </html>

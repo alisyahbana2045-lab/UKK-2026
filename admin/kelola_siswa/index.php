@@ -1,7 +1,7 @@
 <?php
 
-require_once "../../config/admin.php";
-require_once "../../config/koneksi.php";
+require_once __DIR__ . "/../../config/admin.php";
+require_once __DIR__ . "/../../config/koneksi.php";
 
 $query = mysqli_query($conn, "SELECT * FROM t_siswa");
 
@@ -19,11 +19,41 @@ if (!$query) {
     <meta charset="UTF-8">
 
     <title>Kelola Siswa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .main-content {
+            margin-left: 16.666667%;
+        }
+
+        .menu-sidebar {
+            color: white;
+            background-color: transparent;
+            transition: 0.3s;
+        }
+
+        .menu-sidebar:hover {
+            color: white;
+            background-color: #0d6efd;
+        }
+
+    </style>
 
 </head>
 
 <body>
-
+<div class="container-fluid">
 <table width="100%" border="0">
 
     <tr>
@@ -39,8 +69,7 @@ if (!$query) {
 
         <!-- KONTEN -->
 
-        <td valign="top">
-
+        <td class="col-md-9 col-lg-10 p-4 main-content">
             <h1>Kelola Siswa</h1>
 
             <a href="tambah.php">
@@ -48,7 +77,7 @@ if (!$query) {
             </a>
 
             <br><br>
-
+        
             <table border="1" cellpadding="8">
 
                 <tr>
@@ -64,7 +93,7 @@ if (!$query) {
                     <th>Aksi</th>
 
                 </tr>
-
+            
                 <?php
 
                 $no = 1;
@@ -116,27 +145,20 @@ if (!$query) {
                             |
 
                             <a href="hapus.php?id=<?= $siswa['id']; ?>">
-                                Hapus
+                                Non
                             </a>
 
                         </td>
 
                     </tr>
-
-                <?php
-
-                }
-
-                ?>
+                
+                <?php } ?>
 
             </table>
-
-        </td>
-
+</td>
     </tr>
 
 </table>
-
+</div>
 </body>
-
 </html>
