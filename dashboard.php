@@ -20,8 +20,7 @@ require_once "config/session.php";
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
         rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-        crossorigin="anonymous"
-    >
+        crossorigin="anonymous">
 
     <style>
 
@@ -92,22 +91,6 @@ require_once "config/session.php";
         }
 
 
-        /* ICON */
-
-        .card-icon {
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            background-color: #e7f1ff;
-            color: #0d6efd;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-
         /* BUTTON */
 
         .btn {
@@ -166,7 +149,7 @@ require_once "config/session.php";
             </div>
 
 
-            <!-- WELCOME -->
+            <!-- SELAMAT DATANG -->
 
             <div class="card welcome-card shadow-sm mb-4">
 
@@ -197,7 +180,7 @@ require_once "config/session.php";
             <div class="row">
 
 
-                <!-- DATA SISWA -->
+                <!-- SISWA -->
 
                 <div class="col-md-4 mb-4">
 
@@ -207,9 +190,6 @@ require_once "config/session.php";
 
                             <div class="d-flex align-items-center mb-3">
 
-                                <div class="card-icon me-3">
-                                    S
-                                </div>
 
                                 <div>
 
@@ -243,7 +223,7 @@ require_once "config/session.php";
                 </div>
 
 
-                <!-- DATA GURU -->
+                <!-- GURU -->
 
                 <div class="col-md-4 mb-4">
 
@@ -253,9 +233,6 @@ require_once "config/session.php";
 
                             <div class="d-flex align-items-center mb-3">
 
-                                <div class="card-icon me-3">
-                                    G
-                                </div>
 
                                 <div>
 
@@ -289,7 +266,7 @@ require_once "config/session.php";
                 </div>
 
 
-                <!-- DATA KELAS -->
+                <!-- KELAS -->
 
                 <div class="col-md-4 mb-4">
 
@@ -299,9 +276,6 @@ require_once "config/session.php";
 
                             <div class="d-flex align-items-center mb-3">
 
-                                <div class="card-icon me-3">
-                                    K
-                                </div>
 
                                 <div>
 
@@ -343,9 +317,6 @@ require_once "config/session.php";
     </div>
 
 </div>
-
-
-<!-- Bootstrap JS -->
 
 <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js">

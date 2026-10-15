@@ -70,16 +70,24 @@ if (!$query) {
         <!-- KONTEN -->
 
         <td class="col-md-9 col-lg-10 p-4 main-content">
-            <h1>Kelola Siswa</h1>
+            <div class="d-flex justify-content-between align-items-center mb-4">
 
-            <a href="tambah.php">
-                Tambah Siswa
-            </a>
 
-            <br><br>
+                    <h1 class="fw-bold mb-1">
+                         Kelola Siswa
+                    </h1>
+
+                <a href="tambah.php" class="btn btn-primary">
+                    + Tambah Siswa
+                </a>
+
+            </div>
         
-            <table border="1" cellpadding="8">
+        <div class="card shadow-sm">
+            <div class="card-body">
 
+            <table class="table table-bordered table-hover">
+            <thead class="table-dark">
                 <tr>
 
                     <th>No</th>
@@ -93,7 +101,7 @@ if (!$query) {
                     <th>Aksi</th>
 
                 </tr>
-            
+            </thead>
                 <?php
 
                 $no = 1;
@@ -133,8 +141,23 @@ if (!$query) {
                         </td>
 
                         <td>
-                            <?= htmlspecialchars($siswa['status_aktif']); ?>
+
+                <?php if ($siswa['status_aktif'] == 1) { ?>
+
+                    <span class="badge bg-success">
+                        Aktif
+                    </span>
+
+                <?php } else { ?>
+
+                    <span class="badge bg-danger">
+                        Tidak Aktif
+                    </span>
+
+                <?php } ?>
+
                         </td>
+
 
                         <td>
 
@@ -145,17 +168,19 @@ if (!$query) {
                             |
 
                             <a href="hapus.php?id=<?= $siswa['id']; ?>">
-                                Non
+                                Nonaktifkan
                             </a>
 
-                        </td>
+                        </td>                        
 
                     </tr>
                 
                 <?php } ?>
 
             </table>
-</td>
+            </div>
+        </div>
+    </td>
     </tr>
 
 </table>

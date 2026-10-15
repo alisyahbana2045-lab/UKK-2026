@@ -70,16 +70,23 @@ if (!$query) {
         <!-- KONTEN -->
 
         <td class="col-md-9 col-lg-10 p-4 main-content">
-            <h1>Kelola Tahun Ajaran</h1>
 
-            <a href="tambah.php">
-                Tambah Tahun Ajaran
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="fw-bold mb-1">
+                Kelola Tahun Ajaran
+            </h1>
+
+            <a href="tambah.php" class="btn btn-primary">
+                + Tambah Penempatan
             </a>
 
-            <br><br>
+        </div>
         
-            <table border="1" cellpadding="8">
 
+        <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+            <thead class="table-dark">
                 <tr>
 
                     <th>No</th>
@@ -90,7 +97,7 @@ if (!$query) {
                     <th>Aksi</th>
 
                 </tr>
-            
+            </thead>
                 <?php
 
                 $no = 1;
@@ -139,7 +146,9 @@ if (!$query) {
                 <?php } ?>
 
             </table>
-</td>
+    </div>
+    </div>
+    </td>
     </tr>
 
 </table>
