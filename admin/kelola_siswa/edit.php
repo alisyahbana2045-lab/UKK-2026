@@ -1,5 +1,4 @@
 <?php
-
 require_once __DIR__ . "/../../config/admin.php";
 require_once __DIR__ . "/../../config/koneksi.php";
 
@@ -10,7 +9,6 @@ if (!isset($_GET['id'])) {
 
 $id = $_GET['id'];
 
-/* Ambil data siswa */
 $query = mysqli_query($conn, "SELECT * FROM t_siswa WHERE id = '$id'");
 
 if (!$query || mysqli_num_rows($query) == 0) {
@@ -20,10 +18,7 @@ if (!$query || mysqli_num_rows($query) == 0) {
 
 $siswa = mysqli_fetch_assoc($query);
 
-
-/* Proses update */
 if (isset($_POST['update'])) {
-
     $nis = $_POST['nis'];
     $nisn = $_POST['nisn'];
     $nama = $_POST['nama'];
@@ -50,22 +45,17 @@ if (isset($_POST['update'])) {
         echo "Data gagal diubah: " . mysqli_error($conn);
     }
 }
-
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
     <meta charset="UTF-8">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Siswa</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-    
-    <style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <style>
         .sidebar {
             position: fixed;
             top: 0;
@@ -77,6 +67,7 @@ if (isset($_POST['update'])) {
 
         .main-content {
             margin-left: 16.666667%;
+            padding: 30px;
         }
 
         .menu-sidebar {
@@ -85,163 +76,101 @@ if (isset($_POST['update'])) {
             transition: 0.3s;
         }
 
-        .menu-sidebar:hover {
+        .menu-sidebar:hover,
+        .menu-sidebar.active {
             color: white;
             background-color: #0d6efd;
         }
 
+        @media (max-width: 991.98px) {
+            .main-content {
+                margin-left: 25%;
+            }
+        }
     </style>
 </head>
 
 <body>
+<div class="container-fluid">
+    <div class="row">
+        <?php require_once "../../layout/sidebar.php"; ?>
 
-<table width="100%" border="0">
+        <main class="col-md-9 col-lg-10 main-content">
+            <div class="mb-4">
+                <h1 class="fw-bold mb-1">Edit Siswa</h1>
+                <p class="text-muted mb-0">Edit data siswa.</p>
+            </div>
 
-    <tr>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">NIS</label>
+                                <input type="text" name="nis" class="form-control"
+                                    value="<?= htmlspecialchars($siswa['nis']); ?>" required>
+                            </div>
 
-        <!-- MENU -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">NISN</label>
+                                <input type="text" name="nisn" class="form-control"
+                                    value="<?= htmlspecialchars($siswa['nisn']); ?>" required>
+                            </div>
 
-        <td width="200" valign="top">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Nama Lengkap</label>
+                                <input type="text" name="nama" class="form-control"
+                                    value="<?= htmlspecialchars($siswa['nama']); ?>" required>
+                            </div>
 
-            <?php require_once "../../layout/sidebar.php"; ?>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Jenis Kelamin</label>
+                                <select name="jenis_kelamin" class="form-select" required>
+                                    <option value="">-- Pilih Jenis Kelamin --</option>
+                                    <option value="L" <?= $siswa['jenis_kelamin'] == 'L' ? 'selected' : ''; ?>>
+                                        Laki-laki
+                                    </option>
+                                    <option value="P" <?= $siswa['jenis_kelamin'] == 'P' ? 'selected' : ''; ?>>
+                                        Perempuan
+                                    </option>
+                                </select>
+                            </div>
 
-        </td>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tanggal Lahir</label>
+                                <input type="date" name="tanggal_lahir" class="form-control"
+                                    value="<?= htmlspecialchars($siswa['tanggal_lahir']); ?>" required>
+                            </div>
 
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Alamat</label>
+                                <textarea name="alamat" class="form-control" rows="4" required><?= htmlspecialchars($siswa['alamat']); ?></textarea>
+                            </div>
 
-        <!-- KONTEN -->
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label">Status</label>
+                                <select name="status_aktif" class="form-select" required>
+                                    <option value="1" <?= $siswa['status_aktif'] == 1 ? 'selected' : ''; ?>>
+                                        Aktif
+                                    </option>
+                                    <option value="0" <?= $siswa['status_aktif'] == 0 ? 'selected' : ''; ?>>
+                                        Tidak Aktif
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
 
-        <td class="col-md-9 col-lg-10 p-4 main-content">
-
-            <h1>Edit Siswa</h1>
-
-            <form method="POST">
-
-                <table>
-
-                    <tr>
-                        <td>NIS</td>
-                        <td>
-                            <input
-                                type="text"
-                                name="nis"
-                                value="<?= htmlspecialchars($siswa['nis']); ?>"
-                                required
-                            >
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>NISN</td>
-                        <td>
-                            <input
-                                type="text"
-                                name="nisn"
-                                value="<?= htmlspecialchars($siswa['nisn']); ?>"
-                                required
-                            >
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Nama</td>
-                        <td>
-                            <input
-                                type="text"
-                                name="nama"
-                                value="<?= htmlspecialchars($siswa['nama']); ?>"
-                                required
-                            >
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Jenis Kelamin</td>
-                        <td>
-
-                            <select name="jenis_kelamin" required>
-
-                                <option value="">
-                                    -- Pilih --
-                                </option>
-
-                                <option value="L"
-                                    <?= $siswa['jenis_kelamin'] == 'L' ? 'selected' : ''; ?>>
-                                    Laki-laki
-                                </option>
-
-                                <option value="P"
-                                    <?= $siswa['jenis_kelamin'] == 'P' ? 'selected' : ''; ?>>
-                                    Perempuan
-                                </option>
-
-                            </select>
-
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Tanggal Lahir</td>
-                        <td>
-                            <input
-                                type="date"
-                                name="tanggal_lahir"
-                                value="<?= htmlspecialchars($siswa['tanggal_lahir']); ?>"
-                                required
-                            >
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Alamat</td>
-                        <td>
-                            <textarea
-                                name="alamat"
-                                required
-                            ><?= htmlspecialchars($siswa['alamat']); ?></textarea>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td>Status</td>
-                        <td>
-
-                            <select name="status_aktif" required>
-
-                                <option value="1"
-                                    <?= $siswa['status_aktif'] == 1 ? 'selected' : ''; ?>>
-                                    Aktif
-                                </option>
-
-                                <option value="0"
-                                    <?= $siswa['status_aktif'] == 0 ? 'selected' : ''; ?>>
-                                    Tidak Aktif
-                                </option>
-
-                            </select>
-
-                        </td>
-                    </tr>
-
-                    <tr>
-
-                        <td></td>
-
-                        <td>
-
-                            <button type="submit" name="update">
-                                Update
-                            </button>
-
-                            <a href="index.php">
-                                Kembali
-                            </a>
-
-                        </td>
-                    </tr>
-                </table>
-            </form>
-        </td>
-    </tr>
-</table>
+                        <button type="submit" name="update" class="btn btn-primary">
+                            Simpan Perubahan
+                        </button>
+                        <a href="index.php" class="btn btn-secondary">
+                            Kembali
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
 </body>
 </html>

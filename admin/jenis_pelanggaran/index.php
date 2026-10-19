@@ -101,11 +101,19 @@ if (!$query) {
                                         <td><?= htmlspecialchars($data['poin']); ?></td>
                                         <td><?= htmlspecialchars($data['deskripsi']); ?></td>
                                         <td>
-                                            <?php if ($data['status_aktif'] == 1): ?>
-                                                <span class="badge bg-success">Aktif</span>
-                                            <?php else: ?>
-                                                <span class="badge bg-danger">Tidak Aktif</span>
-                                            <?php endif; ?>
+                                            <?php if ($data['status_aktif'] == 1) { ?>
+
+                                                <span class="badge bg-success">
+                                                    Aktif
+                                                </span>
+
+                                            <?php } else { ?>
+
+                                                <span class="badge bg-danger">
+                                                    Tidak Aktif
+                                                </span>
+
+                                            <?php } ?>
                                         </td>
                                         <td>
                                             <a href="edit.php?id=<?= $data['id']; ?>">

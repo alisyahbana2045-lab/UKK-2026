@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 30, 2026 at 02:52 AM
+-- Generation Time: Oct 19, 2026 at 09:54 AM
 -- Server version: 10.4.25-MariaDB
 -- PHP Version: 8.0.23
 
@@ -38,33 +38,21 @@ CREATE TABLE `t_guru` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO t_guru (nip, nama, email, status_aktif, user_id, created_at, updated_at) VALUES
-('198501012010011001', 'Agus Setiawan', 'guru1@gmail.com', 1, 1, NOW(), NOW()),
-('198602152011012002', 'Dewi Lestari', 'guru2@gmail.com', 1, 2, NOW(), NOW()),
-('198703202012021003', 'Rudi Hartono', 'guru3@gmail.com', 1, 3, NOW(), NOW()),
-('198804102013031004', 'Siti Aminah', 'guru4@gmail.com', 1, 4, NOW(), NOW()),
-('198905252014041005', 'Yudi Pratama', 'guru5@gmail.com', 1, 5, NOW(), NOW()),
-('199006122015051006', 'Nina Kurnia', 'guru6@gmail.com', 1, 6, NOW(), NOW()),
-('199107182016061007', 'Bambang Saputra', 'guru7@gmail.com', 1, 7, NOW(), NOW()),
-('199208302017071008', 'Rina Marlina', 'guru8@gmail.com', 1, 8, NOW(), NOW()),
-('199309142018081009', 'Heri Gunawan', 'guru9@gmail.com', 1, 9, NOW(), NOW()),
-('199410052019091010', 'Tina Permata', 'guru10@gmail.com', 1, 10, NOW(), NOW());
 --
 -- Dumping data for table `t_guru`
 --
 
-INSERT INTO `t_users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `role`, `created_at`, `updated_at`) VALUES
-(1, 'Agus Setiawan', 'guru1@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(2, 'Dewi Lestari', 'guru2@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(3, 'Rudi Hartono', 'guru3@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(4, 'Siti Aminah', 'guru4@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(5, 'Yudi Pratama', 'guru5@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(6, 'Nina Kurnia', 'guru6@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(7, 'Bambang Saputra', 'guru7@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(8, 'Rina Marlina', 'guru8@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(9, 'Heri Gunawan', 'guru9@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(10, 'Tina Permata', 'guru10@gmail.com', '2026-01-01 01:00:00', '$2y$10$zLSATni8M/glgKZ5M96OouoIdYOFusTUNympzT2TZ3PfPKPq3b5IG', '', 'guru', '2026-09-23 02:37:22', '2026-09-23 02:37:22'),
-(11, 'Administrator', 'admin@gmail.com', '2026-01-01 01:00:00', '$2y$10$58TDXYEi0KPrIMgJPYB5OOv8UOHdjfdA23f9JqzxVCNnnojFWCHAm', '', 'admin', '2026-09-23 02:37:22', '2026-09-23 02:37:22');
+INSERT INTO `t_guru` (`id`, `nip`, `nama`, `email`, `status_aktif`, `user_id`, `created_at`, `updated_at`) VALUES
+(1, '198501012010011001', 'Agus Setiawan', 'guru1@gmail.com', 1, 1, '2026-10-19 07:50:59', '2026-10-19 07:50:59'),
+(2, '198602152011012002', 'Dewi Lestari', 'guru2@gmail.com', 1, 2, '2026-10-19 07:50:59', '2026-10-19 07:50:59'),
+(3, '198703202012021003', 'Rudi Hartono', 'guru3@gmail.com', 1, 3, '2026-10-19 07:50:59', '2026-10-19 07:50:59'),
+(4, '198804102013031004', 'Siti Aminah', 'guru4@gmail.com', 1, 4, '2026-10-19 07:50:59', '2026-10-19 07:50:59'),
+(5, '198905252014041005', 'Yudi Pratama', 'guru5@gmail.com', 1, 5, '2026-10-19 07:50:59', '2026-10-19 07:50:59'),
+(6, '199006122015051006', 'Nina Kurnia', 'guru6@gmail.com', 1, 6, '2026-10-19 07:50:59', '2026-10-19 07:50:59'),
+(7, '199107182016061007', 'Bambang Saputra', 'guru7@gmail.com', 1, 7, '2026-10-19 07:50:59', '2026-10-19 07:50:59'),
+(8, '199208302017071008', 'Rina Marlina', 'guru8@gmail.com', 1, 8, '2026-10-19 07:50:59', '2026-10-19 07:50:59'),
+(9, '199309142018081009', 'Heri Gunawan', 'guru9@gmail.com', 1, 9, '2026-10-19 07:50:59', '2026-10-19 07:50:59'),
+(10, '199410052019091010', 'Tina Permata', 'guru10@gmail.com', 1, 10, '2026-10-19 07:50:59', '2026-10-19 07:50:59');
 
 -- --------------------------------------------------------
 
@@ -647,25 +635,6 @@ ALTER TABLE `t_kelas_siswa`
 --
 ALTER TABLE `t_pelanggaran`
   ADD CONSTRAINT `t_pelanggaran_ibfk_1` FOREIGN KEY (`pelanggaran_kategori_id`) REFERENCES `t_pelanggaran_kategori` (`id`);
-
---
--- Constraints for table `t_pelanggaran_siswa`
---
-ALTER TABLE `t_pelanggaran_siswa`
-  ADD CONSTRAINT `t_pelanggaran_siswa_ibfk_1` FOREIGN KEY (`tahun_ajaran_id`) REFERENCES `t_tahun_ajaran` (`id`),
-  ADD CONSTRAINT `t_pelanggaran_siswa_ibfk_2` FOREIGN KEY (`siswa_id`) REFERENCES `t_siswa` (`id`),
-  ADD CONSTRAINT `t_pelanggaran_siswa_ibfk_3` FOREIGN KEY (`kelas_id`) REFERENCES `t_kelas` (`id`),
-  ADD CONSTRAINT `t_pelanggaran_siswa_ibfk_4` FOREIGN KEY (`pelanggaran_id`) REFERENCES `t_pelanggaran` (`id`),
-  ADD CONSTRAINT `t_pelanggaran_siswa_ibfk_5` FOREIGN KEY (`pelanggaran_kategori_id`) REFERENCES `t_pelanggaran_kategori` (`id`),
-  ADD CONSTRAINT `t_pelanggaran_siswa_ibfk_6` FOREIGN KEY (`guru_id`) REFERENCES `t_guru` (`id`);
-
---
--- Constraints for table `t_wali_kelas`
---
-ALTER TABLE `t_wali_kelas`
-  ADD CONSTRAINT `t_wali_kelas_ibfk_1` FOREIGN KEY (`tahun_ajaran_id`) REFERENCES `t_tahun_ajaran` (`id`),
-  ADD CONSTRAINT `t_wali_kelas_ibfk_2` FOREIGN KEY (`kelas_id`) REFERENCES `t_kelas` (`id`),
-  ADD CONSTRAINT `t_wali_kelas_ibfk_3` FOREIGN KEY (`guru_id`) REFERENCES `t_guru` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

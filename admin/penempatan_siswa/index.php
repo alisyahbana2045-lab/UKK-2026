@@ -1,7 +1,7 @@
 <?php
 
-require_once "../../config/admin.php";
-require_once "../../config/koneksi.php";
+require_once __DIR__ . "/../../config/admin.php";
+require_once __DIR__ . "/../../config/koneksi.php";
 
 $query = mysqli_query($conn, "
 
@@ -96,11 +96,14 @@ if (!$query) {
 
             <div class="d-flex justify-content-between align-items-center mb-4">
 
-
+                <div>
                     <h1 class="fw-bold mb-1">
                         Penempatan Siswa
                     </h1>
-
+                    <p class="text-muted mb-0">
+                        Data penempatan siswa
+                    </p>
+                </div>
                 <a href="tambah.php" class="btn btn-primary">
                     + Tambah Penempatan
                 </a>

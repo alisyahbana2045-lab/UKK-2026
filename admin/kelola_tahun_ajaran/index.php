@@ -77,7 +77,7 @@ if (!$query) {
             </h1>
 
             <a href="tambah.php" class="btn btn-primary">
-                + Tambah Penempatan
+                + Tambah Tahun Ajaran
             </a>
 
         </div>
@@ -126,7 +126,21 @@ if (!$query) {
                         </td>
 
                         <td>
-                            <?= htmlspecialchars($tahun_ajaran['status_aktif']); ?>
+                                            <?php if ($tahun_ajaran['status_aktif'] == 1) { ?>
+
+                                                <span class="badge bg-success">
+                                                    Aktif
+                                                </span>
+
+                                            <?php } else { ?>
+
+                                                <span class="badge bg-danger">
+                                                    Tidak Aktif
+                                                </span>
+
+                                            <?php } ?>
+
+
                         <td>
 
                             <a href="edit.php?id=<?= $tahun_ajaran['id']; ?>">

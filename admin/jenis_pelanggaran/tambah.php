@@ -66,7 +66,6 @@ if (!$query_kategori) {
             top: 0;
             left: 0;
             bottom: 0;
-            width: 16.666667%;
             overflow-y: auto;
             z-index: 1000;
         }
@@ -76,14 +75,16 @@ if (!$query_kategori) {
             padding: 30px;
         }
 
-        @media (max-width: 991.98px) {
-            .sidebar {
-                width: 25%;
-            }
+        .menu-sidebar {
+            color: white;
+            background-color: transparent;
+            transition: 0.3s;
+        }
 
-            .main-content {
-                margin-left: 25%;
-            }
+        .menu-sidebar:hover,
+        .menu-sidebar.active {
+            color: white;
+            background-color: #0d6efd;
         }
     </style>
 </head>

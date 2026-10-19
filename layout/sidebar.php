@@ -73,14 +73,14 @@ require_once __DIR__ . "/../config/session.php";
             </li>
 
             <li class="nav-item mb-2">
-                <a href="/UKK-2026/admin/kelola_tahun_ajaran/index.php"
+                <a href="/UKK-2026/admin/kategori_pelanggaran/index.php"
                    class="nav-link menu-sidebar">
                     Kategori Pelanggaran
                 </a>
             </li>
 
             <li class="nav-item mb-2">
-                <a href="/UKK-2026/admin/kelola_tahun_ajaran/index.php"
+                <a href="/UKK-2026/admin/laporan/index.php"
                    class="nav-link menu-sidebar">
                     Laporan
                 </a>
