@@ -2,7 +2,13 @@
 require_once __DIR__ . "/../../config/admin.php";
 require_once __DIR__ . "/../../config/koneksi.php";
 
-$query = mysqli_query($conn, "SELECT * FROM t_guru");
+$cari = isset($_GET['cari']) ? $_GET['cari'] : '';
+
+$query = mysqli_query($conn, "SELECT * FROM t_guru
+    WHERE nip LIKE '%$cari%'
+    OR nama LIKE '%$cari%'
+    OR email LIKE '%$cari%'
+    ORDER BY id DESC");
 
 if (!$query) {
     die("Query gagal: " . mysqli_error($conn));
@@ -60,6 +66,16 @@ if (!$query) {
                 <a href="tambah.php" class="btn btn-primary">+ Tambah Guru</a>
             </div>
 
+            <div class="card shadow-sm mb-4">
+                    <form method="GET" class="d-flex ">
+                        <input type="text" name="cari" class="form-control"
+                            placeholder="Cari NIP, nama, atau email guru..."
+                            value="<?= htmlspecialchars($cari); ?>">
+                        <button type="submit" class="btn btn-primary">Cari</button>
+                        <a href="index.php" class="btn btn-secondary">Reset</a>
+                    </form>
+            </div>
+
             <div class="card shadow-sm">
                 <div class="card-body">
                     <div class="table-responsive">
@@ -94,15 +110,20 @@ if (!$query) {
                                         </td>
                                         <td><?= htmlspecialchars($guru['user_id']); ?></td>
                                         <td>
-                                            <a href="edit.php?id=<?= $guru['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
-                                            <a href="hapus.php?id=<?= $guru['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menonaktifkan guru ini?')">Nonaktifkan</a>
+                                            <a href="edit.php?id=<?= $guru['id']; ?>" class="badge btn btn-primary btn-sm">Edit</a>
+                                            <a href="hapus.php?id=<?= $guru['id']; ?>" class="badge btn btn-danger btn-sm"
+                                                onclick="return confirm('Yakin ingin menonaktifkan guru ini?')">
+                                                Nonaktifkan
+                                            </a>
                                         </td>
                                     </tr>
                                 <?php } ?>
 
                                 <?php if (mysqli_num_rows($query) == 0) { ?>
                                     <tr>
-                                        <td colspan="7" class="text-center">Belum ada data guru.</td>
+                                        <td colspan="7" class="text-center">
+                                            Data guru tidak ditemukan.
+                                        </td>
                                     </tr>
                                 <?php } ?>
                             </tbody>

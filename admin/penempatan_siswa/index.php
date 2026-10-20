@@ -3,32 +3,23 @@
 require_once __DIR__ . "/../../config/admin.php";
 require_once __DIR__ . "/../../config/koneksi.php";
 
-$query = mysqli_query($conn, "
+$cari = isset($_GET['cari']) ? $_GET['cari'] : '';
 
-    SELECT
-        t_kelas_siswa.id,
-        t_siswa.nis,
-        t_siswa.nama AS nama_siswa,
-        t_tahun_ajaran.nama AS tahun_ajaran,
-        t_kelas.nama AS nama_kelas,
-        t_kelas_siswa.tanggal_mulai,
-        t_kelas_siswa.tanggal_selesai,
-        t_kelas_siswa.status_aktif
-
-    FROM t_kelas_siswa
-
-    INNER JOIN t_siswa
-        ON t_kelas_siswa.siswa_id = t_siswa.id
-
-    INNER JOIN t_tahun_ajaran
-        ON t_kelas_siswa.tahun_ajaran_id = t_tahun_ajaran.id
-
-    INNER JOIN t_kelas
-        ON t_kelas_siswa.kelas_id = t_kelas.id
-
-    ORDER BY t_kelas_siswa.id DESC
-
-");
+$query = mysqli_query($conn, "SELECT
+    ks.*,
+    s.nis,
+    s.nama AS nama_siswa,
+    k.nama AS nama_kelas,
+    ta.nama AS tahun_ajaran
+    FROM t_kelas_siswa ks
+    LEFT JOIN t_siswa s ON ks.siswa_id = s.id
+    LEFT JOIN t_kelas k ON ks.kelas_id = k.id
+    LEFT JOIN t_tahun_ajaran ta ON ks.tahun_ajaran_id = ta.id
+    WHERE s.nis LIKE '%$cari%'
+    OR s.nama LIKE '%$cari%'
+    OR k.nama LIKE '%$cari%'
+    OR ta.nama LIKE '%$cari%'
+    ORDER BY ks.siswa_id DESC");
 
 if (!$query) {
     die("Query gagal: " . mysqli_error($conn));
@@ -108,6 +99,15 @@ if (!$query) {
                     + Tambah Penempatan
                 </a>
 
+            </div>
+            <div class="card shadow-sm mb-4">
+                <form method="GET" class="d-flex gap-2">
+                    <input type="text" name="cari" class="form-control"
+                    placeholder="Cari NIS, nama siswa, kelas, atau tahun ajaran..."
+                    value="<?= htmlspecialchars($cari); ?>">
+                    <button type="submit" class="btn btn-primary">Cari</button>
+                    <a href="index.php" class="btn btn-secondary">Reset</a>
+                </form>
             </div>
 
 

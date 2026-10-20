@@ -120,14 +120,14 @@ if (!$query) {
 
                                         <td>
                                             <a href="edit.php?id=<?= $data['id']; ?>"
-                                               class="btn btn-warning btn-sm">
+                                               class="badge btn btn-primary btn-sm">
                                                 Edit
                                             </a>
 
                                             <a href="hapus.php?id=<?= $data['id']; ?>"
-                                               class="btn btn-danger btn-sm"
+                                               class="badge btn btn-danger btn-sm"
                                                onclick="return confirm('Yakin ingin menghapus kategori ini?');">
-                                                Hapus
+                                                Nonaktifkan
                                             </a>
                                         </td>
                                     </tr>

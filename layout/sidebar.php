@@ -36,13 +36,7 @@ require_once __DIR__ . "/../config/session.php";
                     Penempatan Siswa
                 </a>
             </li>
-            
-            <li class="nav-item mb-2">
-                <a href="/UKK-2026/admin/kelola_siswa/index.php"
-                   class="nav-link menu-sidebar">
-                    Kelola Wali Kelas
-                </a>
-            </li>            
+                     
 
             <li class="nav-item mb-2">
                 <a href="/UKK-2026/admin/kelola_guru/index.php"
@@ -128,6 +122,27 @@ require_once __DIR__ . "/../config/session.php";
                     Tindakan
                 </a>
             </li>
+
+            <li class="nav-item mb-2">
+                <a href="/UKK-2026/guru/rekap_poin/index.php"
+                   class="nav-link menu-sidebar">
+                    Rekap Poin
+                </a>
+            </li>            
+
+            <li class="nav-item mb-2">
+                <a href="/UKK-2026/guru/laporan/index.php"
+                   class="nav-link menu-sidebar">
+                    Laporan
+                </a>
+            </li> 
+            
+            <li class="nav-item mb-2">
+                <a href="/UKK-2026/guru/riwayat/index.php"
+                   class="nav-link menu-sidebar">
+                    Riwayat
+                </a>
+            </li>            
 
             <li class="nav-item mb-2">
                 <a href="/UKK-2026/about.php"

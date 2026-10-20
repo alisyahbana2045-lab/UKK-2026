@@ -21,8 +21,7 @@ if (isset($_SESSION['user_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
 
 
-<div class="container-fluid min-vh-100 d-flex justify-content-center align-items-center" "
-style="background-color: #00A1DB;">
+<div class="container-fluid min-vh-100 d-flex justify-content-center align-items-center bg-dark">
 
 <div class="card p-4 shadow" style="width: 350px;">
 

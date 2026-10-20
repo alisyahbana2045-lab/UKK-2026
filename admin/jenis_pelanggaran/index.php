@@ -62,6 +62,9 @@ if (!$query) {
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h1 class="fw-bold mb-1">Jenis Pelanggaran</h1>
+                    <p class="text-muted mb-0">
+                        Pengelolaan Data Jenis Pelanggaran
+                    </p>
                 </div>
 
                 <a href="tambah.php" class="btn btn-primary">
@@ -116,11 +119,14 @@ if (!$query) {
                                             <?php } ?>
                                         </td>
                                         <td>
-                                            <a href="edit.php?id=<?= $data['id']; ?>">
+                                            <a href="edit.php?id=<?= $data['id']; ?>"
+                                                class="badge btn btn-primary btn-sm">
                                                 Edit
                                             </a>
 
-                                            <a href="hapus.php?id=<?= $data['id']; ?>" onclick="return confirm('Yakin ingin menghapus data ini?');">
+                                            <a href="hapus.php?id=<?= $data['id']; ?>"
+                                                class="badge btn btn-danger btn-sm"
+                                                onclick="return confirm('Yakin ingin menghapus kategori ini?');">
                                                 Nonaktifkan
                                             </a>
                                         </td>

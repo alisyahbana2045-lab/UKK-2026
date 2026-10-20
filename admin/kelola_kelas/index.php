@@ -2,7 +2,13 @@
 require_once __DIR__ . "/../../config/admin.php";
 require_once __DIR__ . "/../../config/koneksi.php";
 
-$query = mysqli_query($conn, "SELECT * FROM t_kelas");
+$cari = isset($_GET['cari']) ? $_GET['cari'] : '';
+
+$query = mysqli_query($conn, "SELECT * FROM t_kelas
+    WHERE nama LIKE '%$cari%'
+    OR tingkat LIKE '%$cari%'
+    OR jurusan LIKE '%$cari%'
+    ORDER BY id DESC");
 
 if (!$query) {
     die("Query gagal: " . mysqli_error($conn));
@@ -63,6 +69,16 @@ if (!$query) {
                 <a href="tambah.php" class="btn btn-primary">+ Tambah Kelas</a>
             </div>
 
+            <div class="card shadow-sm mb-4">
+                    <form method="GET" class="d-flex ">
+                        <input type="text" name="cari" class="form-control"
+                            placeholder="Cari nama kelas, tingkat, atau jurusan..."
+                            value="<?= htmlspecialchars($cari); ?>">
+                        <button type="submit" class="btn btn-primary">Cari</button>
+                        <a href="index.php" class="btn btn-secondary">Reset</a>
+                    </form>
+            </div>            
+
             <div class="card shadow-sm">
                 <div class="card-body">
                     <div class="table-responsive">
@@ -91,12 +107,20 @@ if (!$query) {
                                             <?php if ($kelas['status_aktif'] == 1) { ?>
                                                 <span class="badge bg-success">Aktif</span>
                                             <?php } else { ?>
-                                                <span class="badge bg-secondary">Tidak Aktif</span>
+                                                <span class="badge bg-danger">Tidak Aktif</span>
                                             <?php } ?>
                                         </td>
                                         <td>
-                                            <a href="edit.php?id=<?= $kelas['id']; ?>" >Edit</a>
-                                            <a href="hapus.php?id=<?= $kelas['id']; ?>"  onclick="return confirm('Yakin ingin menonaktifkan kelas ini?')">Nonaktifkan</a>
+                                            <a href="edit.php?id=<?= $kelas['id']; ?>"
+                                                class="badge btn btn-primary btn-sm">
+                                                Edit
+                                            </a>
+
+                                            <a href="hapus.php?id=<?= $kelas['id']; ?>"
+                                                class="badge btn btn-danger btn-sm"
+                                                onclick="return confirm('Yakin ingin menghapus kategori ini?');">
+                                                Nonaktifkan
+                                            </a>
                                         </td>
                                     </tr>
                                 <?php } ?>

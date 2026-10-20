@@ -3,11 +3,24 @@
 require_once __DIR__ . "/../../config/admin.php";
 require_once __DIR__ . "/../../config/koneksi.php";
 
-$query = mysqli_query($conn, "SELECT * FROM t_siswa");
+$cari = isset($_GET['cari']) ? $_GET['cari'] : '';
+
+$query = mysqli_query($conn, "SELECT * FROM t_siswa
+    WHERE nis LIKE '%$cari%'
+    OR nisn LIKE '%$cari%'
+    OR nama LIKE '%$cari%'
+    ORDER BY id DESC");
 
 if (!$query) {
     die("Query gagal: " . mysqli_error($conn));
 }
+
+
+
+if (!$query) {
+    die("Query gagal: " . mysqli_error($conn));
+}
+
 
 ?>
 
@@ -85,6 +98,17 @@ if (!$query) {
                 </a>
 
             </div>
+
+            <div class="card shadow-sm mb-4">
+                    <form method="GET" class="d-flex ">
+                        <input type="text" name="cari" class="form-control"
+                            placeholder="Cari NIS, NISN, atau nama siswa..."
+                            value="<?= htmlspecialchars($cari); ?>">
+                        <button type="submit" class="btn btn-primary">Cari</button>
+                        <a href="index.php" class="btn btn-secondary">Reset</a>
+                    </form>
+            </div>
+
         
         <div class="card shadow-sm">
             <div class="card-body">
@@ -163,18 +187,17 @@ if (!$query) {
 
 
                         <td>
-
-                            <a href="edit.php?id=<?= $siswa['id']; ?>">
+                            <a href="edit.php?id=<?= $siswa['id']; ?>"
+                                class="badge btn btn-primary btn-sm">
                                 Edit
                             </a>
 
-                            |
-
-                            <a href="hapus.php?id=<?= $siswa['id']; ?>">
+                            <a href="hapus.php?id=<?= $siswa['id']; ?>"
+                                class="badge btn btn-danger btn-sm"
+                                onclick="return confirm('Yakin ingin menghapus kategori ini?');">
                                 Nonaktifkan
                             </a>
-
-                        </td>                        
+                        </td>                    
 
                     </tr>
                 

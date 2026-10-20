@@ -72,14 +72,19 @@ if (!$query) {
         <td class="col-md-9 col-lg-10 p-4 main-content">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
             <h1 class="fw-bold mb-1">
                 Kelola Tahun Ajaran
             </h1>
-
+            <p class="text-muted mb-0">
+                Pengelolaan Tahun Ajaran
+            </p>
+        </div>
             <a href="tambah.php" class="btn btn-primary">
                 + Tambah Tahun Ajaran
             </a>
-
+        
         </div>
         
 
@@ -142,17 +147,16 @@ if (!$query) {
 
 
                         <td>
-
-                            <a href="edit.php?id=<?= $tahun_ajaran['id']; ?>">
+                            <a href="edit.php?id=<?= $tahun_ajaran['id']; ?>"
+                                class="badge btn btn-primary btn-sm">
                                 Edit
                             </a>
 
-                            |
-
-                            <a href="hapus.php?id=<?= $tahun_ajaran['id']; ?>">
+                            <a href="hapus.php?id=<?= $tahun_ajaran['id']; ?>"
+                                class="badge btn btn-danger btn-sm"
+                                onclick="return confirm('Yakin ingin menghapus kategori ini?');">
                                 Nonaktifkan
                             </a>
-
                         </td>
 
                     </tr>
