@@ -1,6 +1,6 @@
 <?php
-require_once "../../config/admin.php";
-require_once "../../config/koneksi.php";
+require_once __DIR__ . "/../../config/admin.php";
+require_once __DIR__ . "/../../config/koneksi.php";
 
 $tahun_ajaran_id = isset($_GET['tahun_ajaran_id']) ? $_GET['tahun_ajaran_id'] : '';
 $kelas_id = isset($_GET['kelas_id']) ? $_GET['kelas_id'] : '';
@@ -23,7 +23,33 @@ if ($siswa_id != '') {
     $where .= " AND siswa_id = '$siswa_id'";
 }
 
-$query = mysqli_query($conn, "SELECT * FROM t_pelanggaran_siswa $where ORDER BY tanggal DESC, id DESC");
+$per_page = 50;
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+
+if ($page < 1) {
+    $page = 1;
+}
+
+$offset = ($page - 1) * $per_page;
+
+$query_jumlah = mysqli_query($conn, "SELECT COUNT(*) AS total FROM t_pelanggaran_siswa $where");
+
+if (!$query_jumlah) {
+    die("Query jumlah gagal: " . mysqli_error($conn));
+}
+
+$total_data = mysqli_fetch_assoc($query_jumlah)['total'];
+$total_halaman = ceil($total_data / $per_page);
+
+if ($total_halaman > 0 && $page > $total_halaman) {
+    $page = $total_halaman;
+    $offset = ($page - 1) * $per_page;
+}
+
+$query = mysqli_query($conn, "SELECT * FROM t_pelanggaran_siswa
+    $where
+    ORDER BY tanggal DESC, id DESC
+    LIMIT $offset, $per_page");
 
 if (!$query) {
     die("Query gagal: " . mysqli_error($conn));
@@ -82,7 +108,9 @@ $query_siswa = mysqli_query($conn, "SELECT id, nama FROM t_siswa ORDER BY nama A
                     <h1 class="fw-bold mb-1">Laporan Pelanggaran</h1>
                     <p class="text-muted mb-0">Data laporan pelanggaran siswa.</p>
                 </div>
-                <a href="cetak.php?tahun_ajaran_id=<?= $tahun_ajaran_id; ?>&kelas_id=<?= $kelas_id; ?>&siswa_id=<?= $siswa_id; ?>" target="_blank" class="btn btn-success">
+
+                <a href="cetak.php?tahun_ajaran_id=<?= $tahun_ajaran_id; ?>&kelas_id=<?= $kelas_id; ?>&siswa_id=<?= $siswa_id; ?>"
+                    target="_blank" class="btn btn-success">
                     🖨 Cetak Laporan
                 </a>
             </div>
@@ -153,7 +181,7 @@ $query_siswa = mysqli_query($conn, "SELECT id, nama FROM t_siswa ORDER BY nama A
                             </thead>
                             <tbody>
                                 <?php
-                                $no = 1;
+                                $no = $offset + 1;
                                 $total_poin = 0;
 
                                 while ($data = mysqli_fetch_assoc($query)) {
@@ -172,19 +200,24 @@ $query_siswa = mysqli_query($conn, "SELECT id, nama FROM t_siswa ORDER BY nama A
                                             <?php if ($data['status'] == 'selesai') { ?>
                                                 <span class="badge bg-success">Selesai</span>
                                             <?php } else { ?>
-                                                <span class="badge bg-warning text-dark"><?= htmlspecialchars($data['status']); ?></span>
+                                                <span class="badge bg-warning text-dark">
+                                                    <?= htmlspecialchars($data['status']); ?>
+                                                </span>
                                             <?php } ?>
                                         </td>
                                     </tr>
                                 <?php } ?>
 
-                                <?php if (mysqli_num_rows($query) == 0) { ?>
+                                <?php if ($total_data == 0) { ?>
                                     <tr>
-                                        <td colspan="9" class="text-center">Belum ada data pelanggaran.</td>
+                                        <td colspan="9" class="text-center">
+                                            Belum ada data pelanggaran.
+                                        </td>
                                     </tr>
                                 <?php } ?>
                             </tbody>
-                            <?php if (mysqli_num_rows($query) > 0) { ?>
+
+                            <?php if ($total_data > 0) { ?>
                                 <tfoot>
                                     <tr class="table-light fw-bold">
                                         <td colspan="5" class="text-end">Total Poin</td>
@@ -195,6 +228,52 @@ $query_siswa = mysqli_query($conn, "SELECT id, nama FROM t_siswa ORDER BY nama A
                             <?php } ?>
                         </table>
                     </div>
+
+                    <?php if ($total_halaman > 1) { ?>
+                        <div class="d-flex justify-content-end mt-3">
+                            <nav>
+                                <ul class="pagination mb-0">
+
+                                    <?php if ($page > 1) { ?>
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="?page=<?= $page - 1; ?>&tahun_ajaran_id=<?= urlencode($tahun_ajaran_id); ?>&kelas_id=<?= urlencode($kelas_id); ?>&siswa_id=<?= urlencode($siswa_id); ?>">
+                                                Sebelumnya
+                                            </a>
+                                        </li>
+                                    <?php } else { ?>
+                                        <li class="page-item disabled">
+                                            <span class="page-link">Sebelumnya</span>
+                                        </li>
+                                    <?php } ?>
+
+                                    <?php for ($i = 1; $i <= $total_halaman; $i++) { ?>
+                                        <li class="page-item <?= ($i == $page) ? 'active' : ''; ?>">
+                                            <a class="page-link"
+                                                href="?page=<?= $i; ?>&tahun_ajaran_id=<?= urlencode($tahun_ajaran_id); ?>&kelas_id=<?= urlencode($kelas_id); ?>&siswa_id=<?= urlencode($siswa_id); ?>">
+                                                <?= $i; ?>
+                                            </a>
+                                        </li>
+                                    <?php } ?>
+
+                                    <?php if ($page < $total_halaman) { ?>
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="?page=<?= $page + 1; ?>&tahun_ajaran_id=<?= urlencode($tahun_ajaran_id); ?>&kelas_id=<?= urlencode($kelas_id); ?>&siswa_id=<?= urlencode($siswa_id); ?>">
+                                                Berikutnya
+                                            </a>
+                                        </li>
+                                    <?php } else { ?>
+                                        <li class="page-item disabled">
+                                            <span class="page-link">Berikutnya</span>
+                                        </li>
+                                    <?php } ?>
+
+                                </ul>
+                            </nav>
+                        </div>
+                    <?php } ?>
+
                 </div>
             </div>
         </main>

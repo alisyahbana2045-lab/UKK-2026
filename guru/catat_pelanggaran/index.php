@@ -14,11 +14,37 @@ $guru = mysqli_fetch_assoc($query_guru);
 
 $cari = isset($_GET['cari']) ? $_GET['cari'] : '';
 
-$query = mysqli_query($conn, "SELECT * FROM t_pelanggaran_siswa
-    WHERE nama_siswa LIKE '%$cari%'
+$where = "WHERE nama_siswa LIKE '%$cari%'
     OR nama_pelanggaran LIKE '%$cari%'
-    OR nama_kelas LIKE '%$cari%'
-    ORDER BY id DESC");
+    OR nama_kelas LIKE '%$cari%'";
+
+$per_page = 10;
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+
+if ($page < 1) {
+    $page = 1;
+}
+
+$offset = ($page - 1) * $per_page;
+
+$query_jumlah = mysqli_query($conn, "SELECT COUNT(*) AS total FROM t_pelanggaran_siswa $where");
+
+if (!$query_jumlah) {
+    die("Query jumlah gagal: " . mysqli_error($conn));
+}
+
+$total_data = mysqli_fetch_assoc($query_jumlah)['total'];
+$total_halaman = ceil($total_data / $per_page);
+
+if ($total_halaman > 0 && $page > $total_halaman) {
+    $page = $total_halaman;
+    $offset = ($page - 1) * $per_page;
+}
+
+$query = mysqli_query($conn, "SELECT * FROM t_pelanggaran_siswa
+    $where
+    ORDER BY id DESC
+    LIMIT $offset, $per_page");
 
 if (!$query) {
     die("Query gagal: " . mysqli_error($conn));
@@ -106,7 +132,7 @@ if (!$query) {
                             </thead>
                             <tbody>
                                 <?php
-                                $no = 1;
+                                $no = $offset + 1;
                                 while ($data = mysqli_fetch_assoc($query)) {
                                 ?>
                                     <tr>
@@ -125,7 +151,7 @@ if (!$query) {
                                     </tr>
                                 <?php } ?>
 
-                                <?php if (mysqli_num_rows($query) == 0) { ?>
+                                <?php if ($total_data == 0) { ?>
                                     <tr>
                                         <td colspan="8" class="text-center">
                                             Belum ada data pelanggaran.
@@ -135,6 +161,52 @@ if (!$query) {
                             </tbody>
                         </table>
                     </div>
+
+                    <?php if ($total_halaman > 1) { ?>
+                        <div class="d-flex justify-content-end mt-3">
+                            <nav>
+                                <ul class="pagination mb-0">
+
+                                    <?php if ($page > 1) { ?>
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="?page=<?= $page - 1; ?>&cari=<?= urlencode($cari); ?>">
+                                                Sebelumnya
+                                            </a>
+                                        </li>
+                                    <?php } else { ?>
+                                        <li class="page-item disabled">
+                                            <span class="page-link">Sebelumnya</span>
+                                        </li>
+                                    <?php } ?>
+
+                                    <?php for ($i = 1; $i <= $total_halaman; $i++) { ?>
+                                        <li class="page-item <?= ($i == $page) ? 'active' : ''; ?>">
+                                            <a class="page-link"
+                                                href="?page=<?= $i; ?>&cari=<?= urlencode($cari); ?>">
+                                                <?= $i; ?>
+                                            </a>
+                                        </li>
+                                    <?php } ?>
+
+                                    <?php if ($page < $total_halaman) { ?>
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="?page=<?= $page + 1; ?>&cari=<?= urlencode($cari); ?>">
+                                                Berikutnya
+                                            </a>
+                                        </li>
+                                    <?php } else { ?>
+                                        <li class="page-item disabled">
+                                            <span class="page-link">Berikutnya</span>
+                                        </li>
+                                    <?php } ?>
+
+                                </ul>
+                            </nav>
+                        </div>
+                    <?php } ?>
+
                 </div>
             </div>
         </main>

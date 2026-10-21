@@ -2,7 +2,32 @@
 require_once __DIR__ . "/../../config/admin.php";
 require_once __DIR__ . "/../../config/koneksi.php";
 
-$query = mysqli_query($conn, "SELECT * FROM t_pelanggaran_kategori ORDER BY id DESC");
+$per_page = 10;
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+
+if ($page < 1) {
+    $page = 1;
+}
+
+$offset = ($page - 1) * $per_page;
+
+$query_jumlah = mysqli_query($conn, "SELECT COUNT(*) AS total FROM t_pelanggaran_kategori");
+
+if (!$query_jumlah) {
+    die("Query jumlah gagal: " . mysqli_error($conn));
+}
+
+$total_data = mysqli_fetch_assoc($query_jumlah)['total'];
+$total_halaman = ceil($total_data / $per_page);
+
+if ($total_halaman > 0 && $page > $total_halaman) {
+    $page = $total_halaman;
+    $offset = ($page - 1) * $per_page;
+}
+
+$query = mysqli_query($conn, "SELECT * FROM t_pelanggaran_kategori
+    ORDER BY id DESC
+    LIMIT $offset, $per_page");
 
 if (!$query) {
     die("Query gagal: " . mysqli_error($conn));
@@ -16,7 +41,6 @@ if (!$query) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kategori Pelanggaran</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
@@ -89,7 +113,7 @@ if (!$query) {
                             <tbody>
 
                                 <?php
-                                $no = 1;
+                                $no = $offset + 1;
 
                                 if (mysqli_num_rows($query) > 0):
                                     while ($data = mysqli_fetch_assoc($query)):
@@ -120,13 +144,13 @@ if (!$query) {
 
                                         <td>
                                             <a href="edit.php?id=<?= $data['id']; ?>"
-                                               class="badge btn btn-primary btn-sm">
+                                                class="badge btn btn-primary btn-sm">
                                                 Edit
                                             </a>
 
                                             <a href="hapus.php?id=<?= $data['id']; ?>"
-                                               class="badge btn btn-danger btn-sm"
-                                               onclick="return confirm('Yakin ingin menghapus kategori ini?');">
+                                                class="badge btn btn-danger btn-sm"
+                                                onclick="return confirm('Yakin ingin menghapus kategori ini?');">
                                                 Nonaktifkan
                                             </a>
                                         </td>
@@ -149,6 +173,48 @@ if (!$query) {
 
                         </table>
                     </div>
+
+                    <?php if ($total_halaman > 1) { ?>
+                        <div class="d-flex justify-content-end mt-3">
+                            <nav>
+                                <ul class="pagination mb-0">
+
+                                    <?php if ($page > 1) { ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<?= $page - 1; ?>">
+                                                Sebelumnya
+                                            </a>
+                                        </li>
+                                    <?php } else { ?>
+                                        <li class="page-item disabled">
+                                            <span class="page-link">Sebelumnya</span>
+                                        </li>
+                                    <?php } ?>
+
+                                    <?php for ($i = 1; $i <= $total_halaman; $i++) { ?>
+                                        <li class="page-item <?= ($i == $page) ? 'active' : ''; ?>">
+                                            <a class="page-link" href="?page=<?= $i; ?>">
+                                                <?= $i; ?>
+                                            </a>
+                                        </li>
+                                    <?php } ?>
+
+                                    <?php if ($page < $total_halaman) { ?>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<?= $page + 1; ?>">
+                                                Berikutnya
+                                            </a>
+                                        </li>
+                                    <?php } else { ?>
+                                        <li class="page-item disabled">
+                                            <span class="page-link">Berikutnya</span>
+                                        </li>
+                                    <?php } ?>
+
+                                </ul>
+                            </nav>
+                        </div>
+                    <?php } ?>
 
                 </div>
             </div>
