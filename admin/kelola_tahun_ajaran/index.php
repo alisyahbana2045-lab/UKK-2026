@@ -39,9 +39,10 @@ if (!$query) {
 
 <head>
     <meta charset="UTF-8">
-    <title>Kelola Kelas</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-        rel="stylesheet">
+    <title>Kelola Tahun Ajaran</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <style>
         .sidebar {
@@ -72,7 +73,9 @@ if (!$query) {
 </head>
 
 <body>
+
 <div class="container-fluid">
+
 <table width="100%" border="0">
 
     <tr>
@@ -85,154 +88,199 @@ if (!$query) {
         <!-- KONTEN -->
         <td class="col-md-9 col-lg-10 p-4 main-content">
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <div>
-            <h1 class="fw-bold mb-1">
-                Kelola Tahun Ajaran
-            </h1>
-            <p class="text-muted mb-0">
-                Pengelolaan Tahun Ajaran
-            </p>
-        </div>
+                <div>
+                    <h1 class="fw-bold mb-1">
+                        Kelola Tahun Ajaran
+                    </h1>
+                    <p class="text-muted mb-0">
+                        Pengelolaan Tahun Ajaran
+                    </p>
+                </div>
 
-            <a href="tambah.php" class="btn btn-primary">
-                + Tambah Tahun Ajaran
-            </a>
+                <a href="tambah.php" class="btn btn-primary">
+                    + Tambah Tahun Ajaran
+                </a>
 
-        </div>
+            </div>
 
-        <div class="card shadow-sm">
-        <div class="card-body">
+            <div class="card shadow-sm">
+                <div class="card-body">
 
-            <table class="table table-bordered table-hover">
+                    <table class="table table-bordered table-hover">
 
-            <thead class="table-dark">
-                <tr>
-                    <th>No</th>
-                    <th>Tahun Ajaran</th>
-                    <th>Tanggal Mulai</th>
-                    <th>Tanggal Selesai</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
+                        <thead class="table-dark">
+                            <tr>
+                                <th>No</th>
+                                <th>Tahun Ajaran</th>
+                                <th>Tanggal Mulai</th>
+                                <th>Tanggal Selesai</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
 
-            <tbody>
+                        <tbody>
 
-                <?php
-                $no = $offset + 1;
+                            <?php
+                            $no = $offset + 1;
 
-                while ($tahun_ajaran = mysqli_fetch_assoc($query)) {
-                ?>
+                            while ($tahun_ajaran = mysqli_fetch_assoc($query)) {
+                            ?>
 
-                    <tr>
+                                <tr>
 
-                        <td>
-                            <?= $no++; ?>
-                        </td>
+                                    <td>
+                                        <?= $no++; ?>
+                                    </td>
 
-                        <td>
-                            <?= htmlspecialchars($tahun_ajaran['nama']); ?>
-                        </td>
+                                    <td>
+                                        <?= htmlspecialchars($tahun_ajaran['nama']); ?>
+                                    </td>
 
-                        <td>
-                            <?= htmlspecialchars($tahun_ajaran['tanggal_mulai']); ?>
-                        </td>
+                                    <td>
+                                        <?= htmlspecialchars($tahun_ajaran['tanggal_mulai']); ?>
+                                    </td>
 
-                        <td>
-                            <?= htmlspecialchars($tahun_ajaran['tanggal_selesai']); ?>
-                        </td>
+                                    <td>
+                                        <?= htmlspecialchars($tahun_ajaran['tanggal_selesai']); ?>
+                                    </td>
 
-                        <td>
-                            <?php if ($tahun_ajaran['status_aktif'] == 1) { ?>
-                                <span class="badge bg-success">
-                                    Aktif
-                                </span>
-                            <?php } else { ?>
-                                <span class="badge bg-danger">
-                                    Tidak Aktif
-                                </span>
+                                    <td>
+                                        <?php if ($tahun_ajaran['status_aktif'] == 1) { ?>
+
+                                            <span class="badge bg-success">
+                                                Aktif
+                                            </span>
+
+                                        <?php } else { ?>
+
+                                            <span class="badge bg-danger">
+                                                Tidak Aktif
+                                            </span>
+
+                                        <?php } ?>
+                                    </td>
+
+                                    <td>
+
+                                        <a href="edit.php?id=<?= $tahun_ajaran['id']; ?>"
+                                            class="badge btn btn-primary btn-sm">
+                                            Edit
+                                        </a>
+
+                                        <?php if ($tahun_ajaran['status_aktif'] == 1) { ?>
+
+                                            <a href="hapus.php?id=<?= $tahun_ajaran['id']; ?>&aksi=nonaktif"
+                                                class="badge btn btn-secondary btn-sm"
+                                                onclick="return confirm('Yakin ingin menonaktifkan tahun ajaran ini?');">
+                                                Nonaktifkan
+                                            </a>
+
+                                        <?php } else { ?>
+
+                                            <a href="hapus.php?id=<?= $tahun_ajaran['id']; ?>&aksi=hapus"
+                                                class="badge btn btn-danger btn-sm"
+                                                onclick="return confirm('Yakin ingin menghapus permanen tahun ajaran ini?');">
+                                                Hapus
+                                            </a>
+
+                                        <?php } ?>
+
+                                    </td>
+
+                                </tr>
+
                             <?php } ?>
-                        </td>
 
-                        <td>
-                            <a href="edit.php?id=<?= $tahun_ajaran['id']; ?>"
-                                class="badge btn btn-primary btn-sm">
-                                Edit
-                            </a>
+                            <?php if ($total_data == 0) { ?>
 
-                            <a href="hapus.php?id=<?= $tahun_ajaran['id']; ?>"
-                                class="badge btn btn-danger btn-sm"
-                                onclick="return confirm('Yakin ingin menghapus kategori ini?');">
-                                Nonaktifkan
-                            </a>
-                        </td>
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        Data tahun ajaran tidak ditemukan.
+                                    </td>
+                                </tr>
 
-                    </tr>
+                            <?php } ?>
 
-                <?php } ?>
+                        </tbody>
 
-                <?php if ($total_data == 0) { ?>
-                    <tr>
-                        <td colspan="6" class="text-center">
-                            Data tahun ajaran tidak ditemukan.
-                        </td>
-                    </tr>
-                <?php } ?>
+                    </table>
 
-            </tbody>
+                    <?php if ($total_halaman > 1) { ?>
 
-            </table>
+                        <div class="d-flex justify-content-end mt-3">
 
-<?php if ($total_halaman > 1) { ?>
-    <div class="d-flex justify-content-end mt-3">
-        <nav>
-            <ul class="pagination mb-0">
+                            <nav>
+                                <ul class="pagination mb-0">
 
-                <?php if ($page > 1) { ?>
-                    <li class="page-item">
-                        <a class="page-link" href="?page=<?= $page - 1; ?>">
-                            Sebelumnya
-                        </a>
-                    </li>
-                <?php } else { ?>
-                    <li class="page-item disabled">
-                        <span class="page-link">Sebelumnya</span>
-                    </li>
-                <?php } ?>
+                                    <?php if ($page > 1) { ?>
 
-                <?php for ($i = 1; $i <= $total_halaman; $i++) { ?>
-                    <li class="page-item <?= ($i == $page) ? 'active' : ''; ?>">
-                        <a class="page-link" href="?page=<?= $i; ?>">
-                            <?= $i; ?>
-                        </a>
-                    </li>
-                <?php } ?>
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="?page=<?= $page - 1; ?>">
+                                                Sebelumnya
+                                            </a>
+                                        </li>
 
-                <?php if ($page < $total_halaman) { ?>
-                    <li class="page-item">
-                        <a class="page-link" href="?page=<?= $page + 1; ?>">
-                            Berikutnya
-                        </a>
-                    </li>
-                <?php } else { ?>
-                    <li class="page-item disabled">
-                        <span class="page-link">Berikutnya</span>
-                    </li>
-                <?php } ?>
+                                    <?php } else { ?>
 
-            </ul>
-        </nav>
-    </div>
-<?php } ?>
-        </div>
-        </div>
+                                        <li class="page-item disabled">
+                                            <span class="page-link">
+                                                Sebelumnya
+                                            </span>
+                                        </li>
+
+                                    <?php } ?>
+
+                                    <?php for ($i = 1; $i <= $total_halaman; $i++) { ?>
+
+                                        <li class="page-item <?= ($i == $page) ? 'active' : ''; ?>">
+                                            <a class="page-link"
+                                                href="?page=<?= $i; ?>">
+                                                <?= $i; ?>
+                                            </a>
+                                        </li>
+
+                                    <?php } ?>
+
+                                    <?php if ($page < $total_halaman) { ?>
+
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="?page=<?= $page + 1; ?>">
+                                                Berikutnya
+                                            </a>
+                                        </li>
+
+                                    <?php } else { ?>
+
+                                        <li class="page-item disabled">
+                                            <span class="page-link">
+                                                Berikutnya
+                                            </span>
+                                        </li>
+
+                                    <?php } ?>
+
+                                </ul>
+                            </nav>
+
+                        </div>
+
+                    <?php } ?>
+
+                </div>
+            </div>
 
         </td>
+
     </tr>
 
 </table>
+
 </div>
+
 </body>
 </html>

@@ -50,6 +50,8 @@ if (!$query) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Kelas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <style>
         .sidebar {
@@ -112,21 +114,21 @@ if (!$query) {
 
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
-                <form method="GET" class="d-flex gap-2">
-                    <input type="text"
-                        name="cari"
-                        class="form-control"
-                        placeholder="Cari nama kelas, tingkat, atau jurusan..."
-                        value="<?= htmlspecialchars($cari); ?>">
+                    <form method="GET" class="d-flex gap-2">
+                        <input type="text"
+                            name="cari"
+                            class="form-control"
+                            placeholder="Cari nama kelas, tingkat, atau jurusan..."
+                            value="<?= htmlspecialchars($cari); ?>">
 
-                    <button type="submit" class="btn btn-primary">
-                        Cari
-                    </button>
+                        <button type="submit" class="btn btn-primary">
+                            Cari
+                        </button>
 
-                    <a href="index.php" class="btn btn-secondary">
-                        Reset
-                    </a>
-                </form>
+                        <a href="index.php" class="btn btn-secondary">
+                            Reset
+                        </a>
+                    </form>
                 </div>
             </div>
 
@@ -192,11 +194,23 @@ if (!$query) {
                                                 Edit
                                             </a>
 
-                                            <a href="hapus.php?id=<?= $kelas['id']; ?>"
-                                                class="badge btn btn-danger btn-sm"
-                                                onclick="return confirm('Yakin ingin menghapus kategori ini?');">
-                                                Nonaktifkan
-                                            </a>
+                                            <?php if ($kelas['status_aktif'] == 1) { ?>
+
+                                                <a href="hapus.php?id=<?= $kelas['id']; ?>&aksi=nonaktif"
+                                                    class="badge btn btn-secondary btn-sm"
+                                                    onclick="return confirm('Yakin ingin menonaktifkan kelas ini?');">
+                                                    Nonaktifkan
+                                                </a>
+
+                                            <?php } else { ?>
+
+                                                <a href="hapus.php?id=<?= $kelas['id']; ?>&aksi=hapus"
+                                                    class="badge btn btn-danger btn-sm"
+                                                    onclick="return confirm('Yakin ingin menghapus permanen data kelas ini?');">
+                                                    Hapus
+                                                </a>
+
+                                            <?php } ?>
                                         </td>
                                     </tr>
 
@@ -219,7 +233,6 @@ if (!$query) {
                         <nav>
                             <ul class="pagination justify-content-end">
 
-                                <!-- Previous -->
                                 <li class="page-item <?= ($page <= 1) ? 'disabled' : ''; ?>">
                                     <a class="page-link"
                                         href="?cari=<?= urlencode($cari); ?>&page=<?= $page - 1; ?>">
@@ -227,7 +240,6 @@ if (!$query) {
                                     </a>
                                 </li>
 
-                                <!-- Nomor Halaman -->
                                 <?php for ($i = 1; $i <= $total_halaman; $i++) { ?>
                                     <li class="page-item <?= ($page == $i) ? 'active' : ''; ?>">
                                         <a class="page-link"
@@ -237,7 +249,6 @@ if (!$query) {
                                     </li>
                                 <?php } ?>
 
-                                <!-- Next -->
                                 <li class="page-item <?= ($page >= $total_halaman) ? 'disabled' : ''; ?>">
                                     <a class="page-link"
                                         href="?cari=<?= urlencode($cari); ?>&page=<?= $page + 1; ?>">

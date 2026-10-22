@@ -42,6 +42,8 @@ if (!$query) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kategori Pelanggaran</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <style>
         .sidebar {
@@ -132,13 +134,17 @@ if (!$query) {
 
                                         <td>
                                             <?php if ($data['status_aktif'] == 1): ?>
+
                                                 <span class="badge bg-success">
                                                     Aktif
                                                 </span>
+
                                             <?php else: ?>
+
                                                 <span class="badge bg-danger">
                                                     Tidak Aktif
                                                 </span>
+
                                             <?php endif; ?>
                                         </td>
 
@@ -148,11 +154,23 @@ if (!$query) {
                                                 Edit
                                             </a>
 
-                                            <a href="hapus.php?id=<?= $data['id']; ?>"
-                                                class="badge btn btn-danger btn-sm"
-                                                onclick="return confirm('Yakin ingin menghapus kategori ini?');">
-                                                Nonaktifkan
-                                            </a>
+                                            <?php if ($data['status_aktif'] == 1): ?>
+
+                                                <a href="hapus.php?id=<?= $data['id']; ?>&aksi=nonaktif"
+                                                    class="badge btn btn-secondary btn-sm"
+                                                    onclick="return confirm('Yakin ingin menonaktifkan kategori ini?');">
+                                                    Nonaktifkan
+                                                </a>
+
+                                            <?php else: ?>
+
+                                                <a href="hapus.php?id=<?= $data['id']; ?>&aksi=hapus"
+                                                    class="badge btn btn-danger btn-sm"
+                                                    onclick="return confirm('Yakin ingin menghapus permanen kategori ini?');">
+                                                    Hapus
+                                                </a>
+
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
 
@@ -175,45 +193,64 @@ if (!$query) {
                     </div>
 
                     <?php if ($total_halaman > 1) { ?>
+
                         <div class="d-flex justify-content-end mt-3">
                             <nav>
                                 <ul class="pagination mb-0">
 
                                     <?php if ($page > 1) { ?>
+
                                         <li class="page-item">
-                                            <a class="page-link" href="?page=<?= $page - 1; ?>">
+                                            <a class="page-link"
+                                                href="?page=<?= $page - 1; ?>">
                                                 Sebelumnya
                                             </a>
                                         </li>
+
                                     <?php } else { ?>
+
                                         <li class="page-item disabled">
-                                            <span class="page-link">Sebelumnya</span>
+                                            <span class="page-link">
+                                                Sebelumnya
+                                            </span>
                                         </li>
+
                                     <?php } ?>
 
                                     <?php for ($i = 1; $i <= $total_halaman; $i++) { ?>
+
                                         <li class="page-item <?= ($i == $page) ? 'active' : ''; ?>">
-                                            <a class="page-link" href="?page=<?= $i; ?>">
+                                            <a class="page-link"
+                                                href="?page=<?= $i; ?>">
                                                 <?= $i; ?>
                                             </a>
                                         </li>
+
                                     <?php } ?>
 
                                     <?php if ($page < $total_halaman) { ?>
+
                                         <li class="page-item">
-                                            <a class="page-link" href="?page=<?= $page + 1; ?>">
+                                            <a class="page-link"
+                                                href="?page=<?= $page + 1; ?>">
                                                 Berikutnya
                                             </a>
                                         </li>
+
                                     <?php } else { ?>
+
                                         <li class="page-item disabled">
-                                            <span class="page-link">Berikutnya</span>
+                                            <span class="page-link">
+                                                Berikutnya
+                                            </span>
                                         </li>
+
                                     <?php } ?>
 
                                 </ul>
                             </nav>
                         </div>
+
                     <?php } ?>
 
                 </div>
