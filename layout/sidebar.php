@@ -1,7 +1,27 @@
 <?php
 require_once __DIR__ . "/../config/session.php";
+require_once __DIR__ . "/../config/koneksi.php";
 
 $current_page = $_SERVER['REQUEST_URI'];
+
+$is_wali_kelas = false;
+
+if ($_SESSION['user_role'] == 'guru') {
+    $user_id = (int) $_SESSION['user_id'];
+
+    $query_wali = mysqli_query($conn, "
+        SELECT wk.id
+        FROM t_wali_kelas wk
+        INNER JOIN t_guru g ON wk.guru_id = g.id
+        WHERE g.user_id = $user_id
+        AND wk.status_aktif = 1
+        LIMIT 1
+    ");
+
+    if (mysqli_num_rows($query_wali) > 0) {
+        $is_wali_kelas = true;
+    }
+}
 ?>
 
 <style>
@@ -98,7 +118,7 @@ $current_page = $_SERVER['REQUEST_URI'];
 
     <h4 class="sidebar-brand">
         <i class="bi bi-mortarboard-fill me-2"></i>
-        SMK MUHAMMADIYAH
+        SPSMU
     </h4>
 
     <div class="sidebar-subtitle">
@@ -248,13 +268,15 @@ $current_page = $_SERVER['REQUEST_URI'];
                 </a>
             </li>
 
-            <li class="nav-item mb-2">
-                <a href="/UKK-2026/guru/laporan/index.php"
-                   class="nav-link menu-sidebar <?= strpos($current_page, '/guru/laporan/') !== false ? 'active' : ''; ?>">
-                    <i class="bi bi-file-earmark-text-fill"></i>
-                    <span>Laporan</span>
-                </a>
-            </li>
+            <?php if ($is_wali_kelas) { ?>
+                <li class="nav-item mb-2">
+                    <a href="/UKK-2026/guru/laporan/index.php"
+                       class="nav-link menu-sidebar <?= strpos($current_page, '/guru/laporan/') !== false ? 'active' : ''; ?>">
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                        <span>Laporan</span>
+                    </a>
+                </li>
+            <?php } ?>
 
             <li class="nav-item mb-2">
                 <a href="/UKK-2026/guru/riwayat/index.php"

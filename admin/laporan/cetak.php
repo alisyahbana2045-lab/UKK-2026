@@ -1,34 +1,47 @@
-<?php
-require_once "../../config/admin.php";
-require_once "../../config/koneksi.php";
 
-$tahun_ajaran_id = isset($_GET['tahun_ajaran_id']) ? $_GET['tahun_ajaran_id'] : '';
-$kelas_id = isset($_GET['kelas_id']) ? $_GET['kelas_id'] : '';
-$siswa_id = isset($_GET['siswa_id']) ? $_GET['siswa_id'] : '';
+<?php
+require_once __DIR__ . "/../../config/admin.php";
+require_once __DIR__ . "/../../config/koneksi.php";
+
+$tahun_ajaran_id = isset($_GET['tahun_ajaran_id']) ? (int) $_GET['tahun_ajaran_id'] : 0;
+$kelas_id = isset($_GET['kelas_id']) ? (int) $_GET['kelas_id'] : 0;
+$siswa_id = isset($_GET['siswa_id']) ? (int) $_GET['siswa_id'] : 0;
 
 $where = "WHERE 1=1";
 
-if ($tahun_ajaran_id != '') {
-    $tahun_ajaran_id = mysqli_real_escape_string($conn, $tahun_ajaran_id);
-    $where .= " AND tahun_ajaran_id = '$tahun_ajaran_id'";
+if ($tahun_ajaran_id > 0) {
+    $where .= " AND ps.tahun_ajaran_id = $tahun_ajaran_id";
 }
 
-if ($kelas_id != '') {
-    $kelas_id = mysqli_real_escape_string($conn, $kelas_id);
-    $where .= " AND kelas_id = '$kelas_id'";
+if ($kelas_id > 0) {
+    $where .= " AND ps.kelas_id = $kelas_id";
 }
 
-if ($siswa_id != '') {
-    $siswa_id = mysqli_real_escape_string($conn, $siswa_id);
-    $where .= " AND siswa_id = '$siswa_id'";
+if ($siswa_id > 0) {
+    $where .= " AND ps.siswa_id = $siswa_id";
 }
 
-$query = mysqli_query($conn, "SELECT * FROM t_pelanggaran_siswa $where ORDER BY tanggal ASC, id ASC");
+$query = mysqli_query($conn, "
+    SELECT
+        ps.*,
+        ta.nama AS nama_tahun_ajaran,
+        k.nama AS nama_kelas,
+        s.nama AS nama_siswa,
+        g.nama AS nama_guru
+    FROM t_pelanggaran_siswa ps
+    LEFT JOIN t_tahun_ajaran ta ON ps.tahun_ajaran_id = ta.id
+    LEFT JOIN t_kelas k ON ps.kelas_id = k.id
+    LEFT JOIN t_siswa s ON ps.siswa_id = s.id
+    LEFT JOIN t_guru g ON ps.guru_id = g.id
+    $where
+    ORDER BY ps.tanggal DESC, ps.id DESC
+");
 
 if (!$query) {
     die("Query gagal: " . mysqli_error($conn));
 }
 
+$total_data = mysqli_num_rows($query);
 $total_poin = 0;
 ?>
 
@@ -36,51 +49,82 @@ $total_poin = 0;
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cetak Laporan Pelanggaran</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            color: #000;
             margin: 30px;
         }
-        .kop {
+        .header {
             text-align: center;
-            border-bottom: 3px solid #000;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
-        .kop h2,
-        .kop h3,
-        .kop p {
+        .header h2 {
+            margin: 0;
+            font-size: 22px;
+        }
+        .header h3 {
+            margin: 5px 0;
+            font-size: 18px;
+        }
+        .header p {
             margin: 3px 0;
+            font-size: 14px;
         }
-        h3 {
-            text-align: center;
+        .line {
+            border-bottom: 2px solid #000;
+            margin-top: 15px;
+        }
+        .info {
             margin-bottom: 20px;
+            font-size: 14px;
         }
-        table {
+        .info table {
+            border: none;
+        }
+        .info td {
+            border: none;
+            padding: 3px 10px 3px 0;
+        }
+        table.laporan {
             width: 100%;
             border-collapse: collapse;
-        }
-        table th,
-        table td {
-            border: 1px solid #000;
-            padding: 7px;
             font-size: 12px;
         }
-        table th {
+        table.laporan th,
+        table.laporan td {
+            border: 1px solid #000;
+            padding: 7px;
+        }
+        table.laporan th {
+            background-color: #212529;
+            color: white;
             text-align: center;
         }
-        .total {
-            font-weight: bold;
+        table.laporan td {
+            vertical-align: top;
         }
-        .tanggal {
-            text-align: right;
-            margin-top: 30px;
+        .total {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .ttd {
+            width: 250px;
+            margin-left: auto;
+            margin-top: 50px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .ttd .nama {
+            margin-top: 70px;
+            font-weight: bold;
+            text-decoration: underline;
         }
         @media print {
             body {
-                margin: 10px;
+                margin: 15px;
             }
             .no-print {
                 display: none;
@@ -88,72 +132,88 @@ $total_poin = 0;
         }
     </style>
 </head>
-<body onload="window.print()">
+<body>
 
-<div class="no-print" style="margin-bottom:20px;">
-    <button onclick="window.print()">🖨 Cetak</button>
+<div class="no-print" style="margin-bottom: 20px;">
+    <button onclick="window.print()">Cetak Laporan</button>
+    <button onclick="window.close()">Tutup</button>
 </div>
 
-<div class="kop">
-    <h2>SMK MUHAMMADIYAH</h2>
-    <h3>SISTEM PELANGGARAN SISWA</h3>
-    <p>LAPORAN DATA PELANGGARAN SISWA</p>
+<div class="header">
+    <h2>SISTEM PELANGGARAN SISWA</h2>
+    <h3>LAPORAN PELANGGARAN SISWA</h3>
+    <p>SMK MUHAMMADIYAH</p>
+    <div class="line"></div>
 </div>
 
-<h3>LAPORAN PELANGGARAN SISWA</h3>
+<div class="info">
+    <table>
+        <tr>
+            <td><strong>Dicetak Oleh</strong></td>
+            <td>: <?= htmlspecialchars($_SESSION['user_name']); ?></td>
+        </tr>
+        <tr>
+            <td><strong>Total Data</strong></td>
+            <td>: <?= $total_data; ?> pelanggaran</td>
+        </tr>
+    </table>
+</div>
 
-<table>
+<table class="laporan">
     <thead>
         <tr>
-            <th>No</th>
-            <th>Tanggal</th>
+            <th width="40">No</th>
+            <th width="80">Tanggal</th>
             <th>Nama Siswa</th>
             <th>Kelas</th>
             <th>Pelanggaran</th>
-            <th>Poin</th>
-            <th>Guru</th>
+            <th width="50">Poin</th>
+            <th>Keterangan</th>
             <th>Tindakan</th>
-            <th>Status</th>
+            <th>Guru</th>
         </tr>
     </thead>
     <tbody>
-        <?php
-        $no = 1;
-        while ($data = mysqli_fetch_assoc($query)) {
-            $total_poin += $data['poin'];
-        ?>
+        <?php if ($total_data > 0) { ?>
+            <?php $no = 1; ?>
+            <?php while ($data = mysqli_fetch_assoc($query)) { ?>
+                <?php $total_poin += (int) $data['poin']; ?>
+                <tr>
+                    <td style="text-align:center;"><?= $no++; ?></td>
+                    <td><?= date('d-m-Y', strtotime($data['tanggal'])); ?></td>
+                    <td><?= htmlspecialchars($data['nama_siswa']); ?></td>
+                    <td><?= htmlspecialchars($data['nama_kelas']); ?></td>
+                    <td><?= htmlspecialchars($data['nama_pelanggaran']); ?></td>
+                    <td style="text-align:center;"><?= (int) $data['poin']; ?></td>
+                    <td><?= htmlspecialchars($data['keterangan'] ?: '-'); ?></td>
+                    <td><?= htmlspecialchars($data['tindakan'] ?: '-'); ?></td>
+                    <td><?= htmlspecialchars($data['nama_guru'] ?: '-'); ?></td>
+                </tr>
+            <?php } ?>
+        <?php } else { ?>
             <tr>
-                <td><?= $no++; ?></td>
-                <td><?= date('d-m-Y', strtotime($data['tanggal'])); ?></td>
-                <td><?= htmlspecialchars($data['nama_siswa']); ?></td>
-                <td><?= htmlspecialchars($data['nama_kelas']); ?></td>
-                <td><?= htmlspecialchars($data['nama_pelanggaran']); ?></td>
-                <td><?= $data['poin']; ?></td>
-                <td><?= htmlspecialchars($data['nama_guru']); ?></td>
-                <td><?= htmlspecialchars($data['tindakan']); ?></td>
-                <td><?= htmlspecialchars($data['status']); ?></td>
+                <td colspan="9" style="text-align:center;">
+                    Tidak ada data pelanggaran.
+                </td>
             </tr>
         <?php } ?>
-
-        <?php if (mysqli_num_rows($query) == 0) { ?>
-            <tr>
-                <td colspan="9" style="text-align:center;">Tidak ada data pelanggaran.</td>
-            </tr>
-        <?php } ?>
-
-        <tr class="total">
-            <td colspan="5" style="text-align:right;">Total Poin</td>
-            <td><?= $total_poin; ?></td>
-            <td colspan="3"></td>
-        </tr>
     </tbody>
 </table>
 
-<div class="tanggal">
-    <p>........................, <?= date('d-m-Y'); ?></p>
-    <br><br><br>
-    <p><b>Guru / Petugas</b></p>
+<div class="total">
+    Total Poin: <?= $total_poin; ?>
 </div>
+
+<div class="ttd">
+    <p>Admin,</p>
+    <p class="nama"><?= htmlspecialchars($_SESSION['user_name']); ?></p>
+</div>
+
+<script>
+    window.onload = function() {
+        window.print();
+    };
+</script>
 
 </body>
 </html>

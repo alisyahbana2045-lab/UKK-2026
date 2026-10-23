@@ -9,7 +9,6 @@ require_once "config/session.php";
     <title>About Me - Sistem Pelanggaran Siswa</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <style>
@@ -18,9 +17,9 @@ require_once "config/session.php";
         }
 
         .main-content {
-            margin-left: 250px;
+            margin-left: 16.666667%;
             min-height: 100vh;
-            padding: 40px;
+            padding: 40px 30px;
         }
 
         .about-card {
@@ -116,6 +115,13 @@ require_once "config/session.php";
             transform: translateY(-3px);
         }
 
+        @media (max-width: 991.98px) {
+            .main-content {
+                margin-left: 25%;
+                padding: 30px 20px;
+            }
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 margin-left: 0;
@@ -166,6 +172,7 @@ require_once "config/session.php";
                 <img src="assets/png/Ustadz Muda.png" alt="Foto Profil" class="profile-img">
 
                 <h1 class="profile-name">Ali Syahbana</h1>
+
                 <p class="profile-role">
                     <i class="bi bi-mortarboard-fill"></i>
                     Siswa SMK Rekayasa Perangkat Lunak
@@ -182,9 +189,11 @@ require_once "config/session.php";
                     <a href="#" class="social-btn">
                         <i class="bi bi-instagram"></i>
                     </a>
+
                     <a href="#" class="social-btn">
                         <i class="bi bi-github"></i>
                     </a>
+
                     <a href="#" class="social-btn">
                         <i class="bi bi-envelope-fill"></i>
                     </a>
@@ -200,14 +209,16 @@ require_once "config/session.php";
                                 <div class="info-icon">
                                     <i class="bi bi-person-fill"></i>
                                 </div>
+
                                 <div>
                                     <small class="text-muted">Nama</small>
                                     <h5 class="mb-0 fw-bold">Ali Syahbana</h5>
                                 </div>
                             </div>
+
                             <p class="text-muted mb-0">
-                                Siswa SMK MUHAMMADIYAH Jurusan Rekayasa Perangkat Lunak yang sedang
-                                mengembangkan kemampuan di bidang pemrograman web.
+                                Siswa SMK MUHAMMADIYAH Jurusan Rekayasa Perangkat Lunak
+                                yang sedang mengembangkan kemampuan di bidang pemrograman web.
                             </p>
                         </div>
                     </div>
@@ -218,11 +229,13 @@ require_once "config/session.php";
                                 <div class="info-icon">
                                     <i class="bi bi-code-slash"></i>
                                 </div>
+
                                 <div>
                                     <small class="text-muted">Keahlian</small>
                                     <h5 class="mb-0 fw-bold">Web Development</h5>
                                 </div>
                             </div>
+
                             <p class="text-muted mb-0">
                                 Mempelajari pembuatan aplikasi web dengan teknologi
                                 front-end dan back-end.

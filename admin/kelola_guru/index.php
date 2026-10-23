@@ -141,7 +141,6 @@ if (!$query) {
                                     <th>Email</th>
                                     <th>Nama</th>
                                     <th>Status</th>
-                                    <th>User ID</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -186,10 +185,6 @@ if (!$query) {
                                                 </span>
 
                                             <?php } ?>
-                                        </td>
-
-                                        <td>
-                                            <?= htmlspecialchars($guru['user_id']); ?>
                                         </td>
 
                                         <td>
