@@ -149,9 +149,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <div class="card shadow-sm">
                 <div class="card-body p-4">
-
-                    <h3 class="fw-bold mb-4">Tambah Guru</h3>
-
+                <div class="mb-4">
+                    <h3 class="fw-bold ">Tambah Guru</h3>
+                    <p class="text-muted mb-0">Tambahkan data guru baru.</p>
+                </div>
                     <?php if ($pesan != '') { ?>
                         <div class="alert alert-<?= $tipe_pesan; ?> alert-dismissible fade show" role="alert">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i>
@@ -176,6 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                    inputmode="numeric"
                                    value="<?= htmlspecialchars($nip); ?>"
                                    required>
+                                   <small class="text-muted">Maksimal 18 digit.</small>
                         </div>
 
                         <div class="mb-3">

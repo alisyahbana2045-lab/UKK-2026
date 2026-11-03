@@ -12,7 +12,7 @@ if ($id <= 0) {
 if ($aksi == 'nonaktif') {
     $query = mysqli_query(
         $conn,
-        "UPDATE t_walikelas SET status_aktif = 0 WHERE id = $id"
+        "UPDATE t_wali_kelas SET status_aktif = 0 WHERE id = $id"
     );
 
     if (!$query) {
@@ -26,7 +26,7 @@ if ($aksi == 'nonaktif') {
 if ($aksi == 'hapus') {
     $query = mysqli_query(
         $conn,
-        "DELETE FROM t_walikelas WHERE id = $id"
+        "DELETE FROM t_wali_kelas WHERE id = $id"
     );
 
     if (!$query) {
