@@ -305,11 +305,15 @@ if (!$query_kelas) {
                         <div>
 
                             <button type="submit" name="simpan" class="btn btn-primary">
+                                <i class="bi bi-save">
                                 Simpan
+                                </i>
                             </button>
 
                             <a href="index.php" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left">
                                 Kembali
+                                </i>
                             </a>
 
                         </div>

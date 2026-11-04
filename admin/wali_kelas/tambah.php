@@ -243,15 +243,17 @@ if (!$query_guru) {
 
                         <div class="d-flex gap-2">
 
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save">
+                                Simpan
+                                </i>
+                            </button>
                             <a href="index.php" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left"></i>
+                                <i class="bi bi-arrow-left">
                                 Kembali
+                                </i>
                             </a>
 
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save"></i>
-                                Simpan
-                            </button>
 
                         </div>
 

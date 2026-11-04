@@ -101,8 +101,16 @@ if (isset($_POST['simpan'])) {
                             </div>
                         </div>
 
-                        <button type="submit" name="simpan" class="btn btn-primary">Simpan</button>
-                        <a href="index.php" class="btn btn-secondary">Kembali</a>
+                        <button type="submit" name="simpan" class="btn btn-primary">
+                            <i class="bi bi-save">
+                            Simpan
+                            </i>
+                        </button>
+                        <a href="index.php" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left">
+                            Kembali
+                            </i>
+                        </a>
                     </form>
                 </div>
             </div>

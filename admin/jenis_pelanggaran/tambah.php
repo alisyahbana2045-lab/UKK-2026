@@ -186,11 +186,15 @@ if (!$query_kategori) {
                         <!-- TOMBOL -->
                         <div class="mt-3">
                             <button type="submit" name="simpan" class="btn btn-primary">
+                                <i class="bi bi-save"></i>
                                 Simpan
+                                </i>
                             </button>
 
                             <a href="index.php" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i>
                                 Kembali
+                                </i>
                             </a>
                         </div>
 

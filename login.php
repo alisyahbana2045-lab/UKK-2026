@@ -60,7 +60,7 @@ if (isset($_SESSION['user_id'])) {
             <input type="password" name="password" class="form-control">
         </div>
 
-            <button type="submit" class="btn btn-outline-success ">Login</button>
+            <button type="submit" class="btn btn-outline-success w-100 rounded-3 login-button">Login</button>
 
 </div>
 </div>

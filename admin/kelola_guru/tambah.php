@@ -217,13 +217,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </div>
 
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-save"></i>
+                            <i class="bi bi-save">
                             Simpan
+                            </i>
                         </button>
 
                         <a href="index.php" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left"></i>
+                            <i class="bi bi-arrow-left">
                             Kembali
+                            </i>
                         </a>
 
                     </form>
