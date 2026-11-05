@@ -10,7 +10,7 @@ if ($id <= 0) {
 
 $query_data = mysqli_query($conn, "
     SELECT *
-    FROM t_walikelas
+    FROM t_wali_kelas
     WHERE id = $id
 ");
 
@@ -24,59 +24,65 @@ if (!$data) {
     die("Data wali kelas tidak ditemukan.");
 }
 
+$pesan = "";
+$jenis_pesan = "";
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tahun_ajaran_id = (int) $_POST['tahun_ajaran_id'];
     $kelas_id = (int) $_POST['kelas_id'];
     $guru_id = (int) $_POST['guru_id'];
     $tanggal_mulai = mysqli_real_escape_string($conn, $_POST['tanggal_mulai']);
     $tanggal_selesai = mysqli_real_escape_string($conn, $_POST['tanggal_selesai']);
+    $status_aktif = (int) $_POST['status_aktif'];
 
     if ($tahun_ajaran_id <= 0 || $kelas_id <= 0 || $guru_id <= 0) {
-        die("Data tahun ajaran, kelas, dan guru wajib dipilih.");
+        $pesan = "Data tahun ajaran, kelas, dan guru wajib dipilih.";
+        $jenis_pesan = "danger";
+    } elseif ($tanggal_mulai == '' || $tanggal_selesai == '') {
+        $pesan = "Tanggal mulai dan tanggal selesai wajib diisi.";
+        $jenis_pesan = "danger";
+    } elseif ($tanggal_selesai < $tanggal_mulai) {
+        $pesan = "Tanggal selesai tidak boleh lebih awal dari tanggal mulai.";
+        $jenis_pesan = "danger";
+    } else {
+        $cek = mysqli_query($conn, "
+            SELECT id
+            FROM t_wali_kelas
+            WHERE tahun_ajaran_id = $tahun_ajaran_id
+            AND kelas_id = $kelas_id
+            AND status_aktif = 1
+            AND id != $id
+            LIMIT 1
+        ");
+
+        if (!$cek) {
+            die("Query pengecekan gagal: " . mysqli_error($conn));
+        }
+
+        if ($status_aktif == 1 && mysqli_num_rows($cek) > 0) {
+            $pesan = "Kelas tersebut sudah memiliki wali kelas aktif pada tahun ajaran yang dipilih.";
+            $jenis_pesan = "danger";
+        } else {
+            $query = mysqli_query($conn, "
+                UPDATE t_wali_kelas SET
+                    tahun_ajaran_id = $tahun_ajaran_id,
+                    kelas_id = $kelas_id,
+                    guru_id = $guru_id,
+                    tanggal_mulai = '$tanggal_mulai',
+                    tanggal_selesai = '$tanggal_selesai',
+                    status_aktif = $status_aktif
+                WHERE id = $id
+            ");
+
+            if (!$query) {
+                $pesan = "Data wali kelas gagal diperbarui: " . mysqli_error($conn);
+                $jenis_pesan = "danger";
+            } else {
+            header("Location: index.php");
+            exit;
+            }
+        }
     }
-
-    if ($tanggal_mulai == '' || $tanggal_selesai == '') {
-        die("Tanggal mulai dan tanggal selesai wajib diisi.");
-    }
-
-    if ($tanggal_selesai < $tanggal_mulai) {
-        die("Tanggal selesai tidak boleh lebih awal dari tanggal mulai.");
-    }
-
-    $cek = mysqli_query($conn, "
-        SELECT id
-        FROM t_walikelas
-        WHERE tahun_ajaran_id = $tahun_ajaran_id
-        AND kelas_id = $kelas_id
-        AND status_aktif = 1
-        AND id != $id
-        LIMIT 1
-    ");
-
-    if (!$cek) {
-        die("Query pengecekan gagal: " . mysqli_error($conn));
-    }
-
-    if (mysqli_num_rows($cek) > 0) {
-        die("Kelas tersebut sudah memiliki wali kelas aktif pada tahun ajaran yang dipilih.");
-    }
-
-    $query = mysqli_query($conn, "
-        UPDATE t_walikelas SET
-            tahun_ajaran_id = $tahun_ajaran_id,
-            kelas_id = $kelas_id,
-            guru_id = $guru_id,
-            tanggal_mulai = '$tanggal_mulai',
-            tanggal_selesai = '$tanggal_selesai'
-        WHERE id = $id
-    ");
-
-    if (!$query) {
-        die("Data wali kelas gagal diperbarui: " . mysqli_error($conn));
-    }
-
-    header("Location: index.php");
-    exit;
 }
 
 $query_tahun = mysqli_query($conn, "
@@ -163,86 +169,69 @@ if (!$query_guru) {
 
             <div class="mb-4">
                 <h1 class="fw-bold mb-1">Edit Wali Kelas</h1>
-                <p class="text-muted mb-0">
-                    Perbarui Data Wali Kelas
-                </p>
+                <p class="text-muted mb-0">Perbarui Data Wali Kelas</p>
             </div>
 
             <div class="card shadow-sm">
                 <div class="card-body">
 
+                    <?php if ($pesan != "") { ?>
+                        <div class="alert alert-<?= $jenis_pesan; ?> alert-dismissible fade show" role="alert">
+                            <?= htmlspecialchars($pesan); ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <?php } ?>
+
                     <form method="POST">
 
                         <div class="mb-3">
-                            <label class="form-label">
-                                Tahun Ajaran
-                            </label>
-
+                            <label class="form-label">Tahun Ajaran</label>
                             <select name="tahun_ajaran_id" class="form-select" required>
                                 <option value="">-- Pilih Tahun Ajaran --</option>
 
                                 <?php while ($tahun = mysqli_fetch_assoc($query_tahun)) { ?>
-
                                     <option value="<?= $tahun['id']; ?>"
                                         <?= ($tahun['id'] == $data['tahun_ajaran_id']) ? 'selected' : ''; ?>>
                                         <?= htmlspecialchars($tahun['nama']); ?>
                                     </option>
-
                                 <?php } ?>
-
                             </select>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">
-                                Kelas
-                            </label>
-
+                            <label class="form-label">Kelas</label>
                             <select name="kelas_id" class="form-select" required>
                                 <option value="">-- Pilih Kelas --</option>
 
                                 <?php while ($kelas = mysqli_fetch_assoc($query_kelas)) { ?>
-
                                     <option value="<?= $kelas['id']; ?>"
                                         <?= ($kelas['id'] == $data['kelas_id']) ? 'selected' : ''; ?>>
                                         <?= htmlspecialchars($kelas['nama']); ?>
                                         - <?= htmlspecialchars($kelas['tingkat']); ?>
                                         <?= !empty($kelas['jurusan']) ? ' - ' . htmlspecialchars($kelas['jurusan']) : ''; ?>
                                     </option>
-
                                 <?php } ?>
-
                             </select>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">
-                                Guru / Wali Kelas
-                            </label>
-
+                            <label class="form-label">Guru / Wali Kelas</label>
                             <select name="guru_id" class="form-select" required>
                                 <option value="">-- Pilih Guru --</option>
 
                                 <?php while ($guru = mysqli_fetch_assoc($query_guru)) { ?>
-
                                     <option value="<?= $guru['id']; ?>"
                                         <?= ($guru['id'] == $data['guru_id']) ? 'selected' : ''; ?>>
                                         <?= htmlspecialchars($guru['nama']); ?>
                                         - NIP <?= htmlspecialchars($guru['nip']); ?>
                                     </option>
-
                                 <?php } ?>
-
                             </select>
                         </div>
 
                         <div class="row">
-
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">
-                                    Tanggal Mulai
-                                </label>
-
+                                <label class="form-label">Tanggal Mulai</label>
                                 <input type="date"
                                        name="tanggal_mulai"
                                        class="form-control"
@@ -251,21 +240,28 @@ if (!$query_guru) {
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">
-                                    Tanggal Selesai
-                                </label>
-
+                                <label class="form-label">Tanggal Selesai</label>
                                 <input type="date"
                                        name="tanggal_selesai"
                                        class="form-control"
                                        value="<?= htmlspecialchars($data['tanggal_selesai']); ?>"
                                        required>
                             </div>
+                        </div>
 
+                        <div class="mb-4">
+                            <label class="form-label">Status</label>
+                            <select name="status_aktif" class="form-select" required>
+                                <option value="1" <?= ($data['status_aktif'] == 1) ? 'selected' : ''; ?>>
+                                    Aktif
+                                </option>
+                                <option value="0" <?= ($data['status_aktif'] == 0) ? 'selected' : ''; ?>>
+                                    Tidak Aktif
+                                </option>
+                            </select>
                         </div>
 
                         <div class="d-flex gap-2">
-
                             <a href="index.php" class="btn btn-secondary">
                                 <i class="bi bi-arrow-left"></i>
                                 Kembali
@@ -275,7 +271,6 @@ if (!$query_guru) {
                                 <i class="bi bi-save"></i>
                                 Simpan Perubahan
                             </button>
-
                         </div>
 
                     </form>
@@ -288,5 +283,6 @@ if (!$query_guru) {
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

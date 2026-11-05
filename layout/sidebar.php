@@ -268,15 +268,25 @@ if ($_SESSION['user_role'] == 'guru') {
                 </a>
             </li>
 
-            <?php if ($is_wali_kelas) { ?>
-                <li class="nav-item mb-2">
-                    <a href="/UKK-2026/guru/laporan/index.php"
-                       class="nav-link menu-sidebar <?= strpos($current_page, '/guru/laporan/') !== false ? 'active' : ''; ?>">
-                        <i class="bi bi-file-earmark-text-fill"></i>
-                        <span>Laporan</span>
-                    </a>
-                </li>
-            <?php } ?>
+<?php if ($is_wali_kelas) { ?>
+
+    <li class="nav-item mb-2">
+        <a href="/UKK-2026/guru/rekap_kelas/index.php"
+           class="nav-link menu-sidebar <?= strpos($current_page, '/guru/rekap_kelas/') !== false ? 'active' : ''; ?>">
+            <i class="bi bi-bar-chart-line-fill"></i>
+            <span>Rekap Kelas</span>
+        </a>
+    </li>
+
+    <li class="nav-item mb-2">
+        <a href="/UKK-2026/guru/laporan/index.php"
+           class="nav-link menu-sidebar <?= strpos($current_page, '/guru/laporan/') !== false ? 'active' : ''; ?>">
+            <i class="bi bi-file-earmark-text-fill"></i>
+            <span>Laporan</span>
+        </a>
+    </li>
+
+<?php } ?>
 
             <li class="nav-item mb-2">
                 <a href="/UKK-2026/guru/riwayat/index.php"

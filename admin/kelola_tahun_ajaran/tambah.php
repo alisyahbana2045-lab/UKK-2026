@@ -4,18 +4,24 @@ require_once __DIR__ . "/../../config/koneksi.php";
 
 if (isset($_POST['simpan'])) {
     $nama = $_POST['nama'];
+    $tanggal_mulai = $_POST['tanggal_mulai'];
+    $tanggal_selesai = $_POST['tanggal_selesai'];
     $status_aktif = $_POST['status_aktif'];
 
-    $query = mysqli_query($conn, "INSERT INTO t_tahun_ajaran
-        (nama, status_aktif)
-        VALUES
-        ('$nama', '$status_aktif')");
-
-    if ($query) {
-        header("Location: index.php");
-        exit;
+    if ($tanggal_selesai < $tanggal_mulai) {
+        $error = "Tanggal selesai tidak boleh lebih awal dari tanggal mulai.";
     } else {
-        echo "Data gagal disimpan: " . mysqli_error($conn);
+        $query = mysqli_query($conn, "INSERT INTO t_tahun_ajaran
+            (nama, tanggal_mulai, tanggal_selesai, status_aktif)
+            VALUES
+            ('$nama', '$tanggal_mulai', '$tanggal_selesai', '$status_aktif')");
+
+        if ($query) {
+            header("Location: index.php");
+            exit;
+        } else {
+            $error = "Data gagal disimpan: " . mysqli_error($conn);
+        }
     }
 }
 ?>
@@ -26,7 +32,6 @@ if (isset($_POST['simpan'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tambah Tahun Ajaran</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
@@ -68,10 +73,27 @@ if (isset($_POST['simpan'])) {
 
             <div class="card shadow-sm">
                 <div class="card-body">
+                    <?php if (isset($error)) : ?>
+                        <div class="alert alert-danger">
+                            <?= $error; ?>
+                        </div>
+                    <?php endif; ?>
+
                     <form method="POST">
                         <div class="mb-3">
                             <label class="form-label">Nama Tahun Ajaran</label>
-                            <input type="text" name="nama" class="form-control" placeholder="Contoh: 2026/2027" required>
+                            <input type="text" name="nama" class="form-control"
+                                placeholder="Contoh: 2026/2027" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tanggal Mulai</label>
+                            <input type="date" name="tanggal_mulai" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tanggal Selesai</label>
+                            <input type="date" name="tanggal_selesai" class="form-control" required>
                         </div>
 
                         <div class="mb-4">
@@ -83,14 +105,10 @@ if (isset($_POST['simpan'])) {
                         </div>
 
                         <button type="submit" name="simpan" class="btn btn-primary">
-                            <i class="bi bi-save">
-                            Simpan
-                            </i>
+                            <i class="bi bi-save"></i> Simpan
                         </button>
                         <a href="index.php" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left">
-                            Kembali
-                            </i>
+                            <i class="bi bi-arrow-left"></i> Kembali
                         </a>
                     </form>
                 </div>
