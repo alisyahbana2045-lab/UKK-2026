@@ -1,6 +1,6 @@
 <?php
-require_once "../../config/session.php";
-require_once "../../config/koneksi.php";
+require_once __DIR__ . "/../../config/session.php";
+require_once __DIR__ . "/../../config/koneksi.php";
 
 $user_id = $_SESSION['user_id'];
 $cari = isset($_GET['cari']) ? $_GET['cari'] : '';

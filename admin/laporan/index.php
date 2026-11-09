@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/../../config/admin.php";
 require_once __DIR__ . "/../../config/koneksi.php";
@@ -13,6 +14,39 @@ if ($page < 1) {
 
 $per_page = 10;
 $offset = ($page - 1) * $per_page;
+
+// Proses hapus laporan
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hapus_id'])) {
+    $hapus_id = (int) $_POST['hapus_id'];
+
+    $stmt = mysqli_prepare($conn, "
+        DELETE FROM t_pelanggaran_siswa
+        WHERE id = ?
+    ");
+
+    if (!$stmt) {
+        die("Prepare gagal: " . mysqli_error($conn));
+    }
+
+    mysqli_stmt_bind_param($stmt, "i", $hapus_id);
+
+    if (mysqli_stmt_execute($stmt)) {
+        mysqli_stmt_close($stmt);
+
+        $redirect = http_build_query([
+            'tahun_ajaran_id' => $tahun_ajaran_id,
+            'kelas_id' => $kelas_id,
+            'siswa_id' => $siswa_id,
+            'page' => $page,
+            'hapus' => 'berhasil'
+        ]);
+
+        header("Location: index.php?$redirect");
+        exit;
+    } else {
+        die("Data gagal dihapus: " . mysqli_stmt_error($stmt));
+    }
+}
 
 $where = "WHERE 1=1";
 
@@ -54,7 +88,7 @@ $count_query = mysqli_query($conn, "
 
 $count_data = mysqli_fetch_assoc($count_query);
 $total_data = (int) $count_data['total'];
-$total_pages = ceil($total_data / $per_page);
+$total_pages = (int) ceil($total_data / $per_page);
 
 $total_poin_query = mysqli_query($conn, "
     SELECT COALESCE(SUM(ps.poin), 0) AS total_poin
@@ -95,10 +129,12 @@ if (!$query) {
     <title>Laporan - Sistem Pelanggaran Siswa</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
     <style>
         body {
             background-color: #f1f3f5;
         }
+
         .sidebar {
             position: fixed;
             top: 0;
@@ -107,24 +143,29 @@ if (!$query) {
             overflow-y: auto;
             z-index: 1000;
         }
+
         .main-content {
             margin-left: 16.666667%;
             padding: 30px;
         }
+
         .menu-sidebar {
             color: white;
             background-color: transparent;
             transition: 0.3s;
         }
+
         .menu-sidebar:hover,
         .menu-sidebar.active {
             color: white;
             background-color: #0d6efd;
         }
+
         .stat-card {
             border: none;
             border-radius: 12px;
         }
+
         .stat-icon {
             width: 50px;
             height: 50px;
@@ -136,11 +177,13 @@ if (!$query) {
             color: white;
             font-size: 22px;
         }
+
         .table th {
             background-color: #212529;
             color: white;
             white-space: nowrap;
         }
+
         @media (max-width: 991.98px) {
             .main-content {
                 margin-left: 25%;
@@ -148,19 +191,29 @@ if (!$query) {
         }
     </style>
 </head>
-<body>
 
+<body>
 <div class="container-fluid">
     <div class="row">
+
         <?php require_once "../../layout/sidebar.php"; ?>
 
         <main class="col-md-9 col-lg-10 main-content">
+
             <div class="mb-4">
                 <h1 class="fw-bold mb-1">Laporan Pelanggaran</h1>
                 <p class="text-muted mb-0">
                     Laporan seluruh pelanggaran siswa.
                 </p>
             </div>
+
+            <?php if (isset($_GET['hapus']) && $_GET['hapus'] == 'berhasil') { ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Data laporan berhasil dihapus.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php } ?>
 
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
@@ -245,6 +298,7 @@ if (!$query) {
 
             <div class="card shadow-sm">
                 <div class="card-body">
+
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
                             <h5 class="fw-bold mb-1">
@@ -275,11 +329,14 @@ if (!$query) {
                                     <th>Poin</th>
                                     <th>Keterangan</th>
                                     <th>Tindakan</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
+
                             <tbody>
                                 <?php if (mysqli_num_rows($query) > 0) { ?>
                                     <?php $no = $offset + 1; ?>
+
                                     <?php while ($data = mysqli_fetch_assoc($query)) { ?>
                                         <tr>
                                             <td><?= $no++; ?></td>
@@ -294,11 +351,24 @@ if (!$query) {
                                             </td>
                                             <td><?= htmlspecialchars($data['keterangan'] ?: '-'); ?></td>
                                             <td><?= htmlspecialchars($data['tindakan'] ?: '-'); ?></td>
+                                            <td>
+                                                <form method="POST"
+                                                      onsubmit="return confirm('Yakin ingin menghapus laporan ini?');">
+
+                                                    <input type="hidden" name="hapus_id"
+                                                           value="<?= (int) $data['id']; ?>">
+
+                                                    <button type="submit" class="btn btn-danger btn-sm">
+                                                        <i class="bi bi-trash"></i> Hapus
+                                                    </button>
+                                                </form>
+                                            </td>
                                         </tr>
                                     <?php } ?>
+
                                 <?php } else { ?>
                                     <tr>
-                                        <td colspan="8" class="text-center py-4 text-muted">
+                                        <td colspan="9" class="text-center py-4 text-muted">
                                             <i class="bi bi-inbox fs-3 d-block mb-2"></i>
                                             Belum ada data pelanggaran.
                                         </td>
@@ -312,6 +382,7 @@ if (!$query) {
                         <div class="d-flex justify-content-end mt-3">
                             <nav>
                                 <ul class="pagination mb-0">
+
                                     <li class="page-item <?= ($page <= 1) ? 'disabled' : ''; ?>">
                                         <a class="page-link"
                                            href="?tahun_ajaran_id=<?= $tahun_ajaran_id; ?>&kelas_id=<?= $kelas_id; ?>&siswa_id=<?= $siswa_id; ?>&page=<?= $page - 1; ?>">
@@ -334,12 +405,15 @@ if (!$query) {
                                             Berikutnya
                                         </a>
                                     </li>
+
                                 </ul>
                             </nav>
                         </div>
                     <?php } ?>
+
                 </div>
             </div>
+
         </main>
     </div>
 </div>

@@ -3,14 +3,21 @@ require_once __DIR__ . "/../../config/admin.php";
 require_once __DIR__ . "/../../config/koneksi.php";
 
 if (isset($_POST['simpan'])) {
-    $nama = $_POST['nama'];
+    $nama = trim($_POST['nama']);
     $tanggal_mulai = $_POST['tanggal_mulai'];
     $tanggal_selesai = $_POST['tanggal_selesai'];
     $status_aktif = $_POST['status_aktif'];
 
+    // 1. Cek apakah nama tahun ajaran sudah ada di database
+    $cek_duplikasi = mysqli_query($conn, "SELECT * FROM t_tahun_ajaran WHERE nama = '$nama'");
+
     if ($tanggal_selesai < $tanggal_mulai) {
         $error = "Tanggal selesai tidak boleh lebih awal dari tanggal mulai.";
+    } elseif (mysqli_num_rows($cek_duplikasi) > 0) {
+        // 2. Jika sudah ada, tampilkan pesan error
+        $error = "Gagal! Tahun ajaran '$nama' sudah terdaftar di database.";
     } else {
+        // 3. Jika aman, jalankan insert
         $query = mysqli_query($conn, "INSERT INTO t_tahun_ajaran
             (nama, tanggal_mulai, tanggal_selesai, status_aktif)
             VALUES

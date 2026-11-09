@@ -6,17 +6,19 @@ $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $aksi = isset($_GET['aksi']) ? $_GET['aksi'] : '';
 
 if ($id <= 0) {
-    die("ID tahun ajaran tidak valid.");
+    header("Location: index.php?pesan=id_tidak_valid");
+    exit;
 }
 
 if ($aksi == 'nonaktif') {
     $query = mysqli_query($conn, "UPDATE t_tahun_ajaran SET status_aktif = 0 WHERE id = $id");
 
     if (!$query) {
-        die("Data tahun ajaran gagal dinonaktifkan: " . mysqli_error($conn));
+        header("Location: index.php?pesan=gagal_db");
+        exit;
     }
 
-    header("Location: index.php");
+    header("Location: index.php?pesan=sukses_nonaktif");
     exit;
 }
 
@@ -27,11 +29,13 @@ if ($aksi == 'hapus') {
     );
 
     if (!$cek_penempatan) {
-        die("Query gagal: " . mysqli_error($conn));
+        header("Location: index.php?pesan=gagal_db");
+        exit;
     }
 
     if (mysqli_num_rows($cek_penempatan) > 0) {
-        die("Tahun ajaran tidak bisa dihapus karena masih memiliki data penempatan siswa.");
+        header("Location: index.php?pesan=gagal_relasi");
+        exit;
     }
 
     $query = mysqli_query(
@@ -40,10 +44,11 @@ if ($aksi == 'hapus') {
     );
 
     if (!$query) {
-        die("Data tahun ajaran gagal dihapus: " . mysqli_error($conn));
+        header("Location: index.php?pesan=gagal_db");
+        exit;
     }
 
-    header("Location: index.php");
+    header("Location: index.php?pesan=sukses_hapus");
     exit;
 }
 
