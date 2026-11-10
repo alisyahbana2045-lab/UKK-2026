@@ -1,11 +1,17 @@
 
 <?php
+
 require_once __DIR__ . "/../../config/session.php";
 require_once __DIR__ . "/../../config/koneksi.php";
 
 $user_id = $_SESSION['user_id'];
 
-$query_guru = mysqli_query($conn, "SELECT id, nama FROM t_guru WHERE user_id = '$user_id' AND status_aktif = 1");
+$query_guru = mysqli_query($conn, "
+    SELECT id, nama
+    FROM t_guru
+    WHERE user_id = '$user_id'
+    AND status_aktif = 1
+");
 
 if (!$query_guru || mysqli_num_rows($query_guru) == 0) {
     die("Data guru tidak ditemukan.");
@@ -19,6 +25,7 @@ $cari_esc = mysqli_real_escape_string($conn, $cari);
 
 // Pagination
 $per_page = 10;
+
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 
 if ($page < 1) {
@@ -69,6 +76,7 @@ if (!$query_jumlah) {
 }
 
 $total_data = mysqli_fetch_assoc($query_jumlah)['total'];
+
 $total_halaman = ceil($total_data / $per_page);
 
 if ($total_halaman > 0 && $page > $total_halaman) {
@@ -88,6 +96,7 @@ $query = mysqli_query($conn, "
 if (!$query) {
     die("Query gagal: " . mysqli_error($conn));
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -96,6 +105,7 @@ if (!$query) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Catat Pelanggaran</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -103,6 +113,7 @@ if (!$query) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <style>
+
         .sidebar {
             position: fixed;
             top: 0;
@@ -134,32 +145,45 @@ if (!$query) {
                 margin-left: 25%;
             }
         }
+
     </style>
+
 </head>
 
 <body>
 
 <div class="container-fluid">
+
     <div class="row">
 
         <?php require_once "../../layout/sidebar.php"; ?>
 
         <main class="col-md-9 col-lg-10 main-content">
 
+            <!-- HEADER -->
             <div class="d-flex justify-content-between align-items-center mb-4">
+
                 <div>
-                    <h1 class="fw-bold mb-1">Catat Pelanggaran</h1>
-                    <p class="text-muted mb-0">Mencatat pelanggaran siswa</p>
+                    <h1 class="fw-bold mb-1">
+                        Catat Pelanggaran
+                    </h1>
+
+                    <p class="text-muted mb-0">
+                        Mencatat pelanggaran siswa
+                    </p>
                 </div>
 
                 <a href="tambah.php" class="btn btn-primary">
                     + Catat Pelanggaran
                 </a>
+
             </div>
 
             <!-- PENCARIAN -->
             <div class="card shadow-sm mb-4">
+
                 <div class="card-body">
+
                     <form method="GET" class="d-flex gap-2">
 
                         <input
@@ -179,11 +203,14 @@ if (!$query) {
                         </a>
 
                     </form>
+
                 </div>
+
             </div>
 
             <!-- TABEL -->
             <div class="card shadow-sm">
+
                 <div class="card-body">
 
                     <div class="table-responsive">
@@ -191,68 +218,98 @@ if (!$query) {
                         <table class="table table-bordered table-hover align-middle">
 
                             <thead class="table-dark">
+
                                 <tr>
                                     <th>No</th>
                                     <th>Nama Siswa</th>
                                     <th>Kelas</th>
                                     <th>Pelanggaran</th>
                                     <th>Poin</th>
-                                    <th>Tanggal</th>
+                                    <th>Tanggal Kejadian</th>
+                                    <th>Tanggal Dicatat</th>
                                     <th>Guru</th>
                                     <th>Status</th>
                                 </tr>
+
                             </thead>
 
                             <tbody>
 
                                 <?php
+
                                 $no = $offset + 1;
 
                                 if (mysqli_num_rows($query) > 0) {
+
                                     while ($data = mysqli_fetch_assoc($query)) {
+
                                 ?>
 
                                     <tr>
-                                        <td><?= $no++; ?></td>
 
+                                        <!-- Nomor -->
+                                        <td>
+                                            <?= $no++; ?>
+                                        </td>
+
+                                        <!-- Nama Siswa -->
                                         <td>
                                             <?= htmlspecialchars($data['nama_siswa']); ?>
                                         </td>
 
+                                        <!-- Kelas -->
                                         <td>
                                             <?= htmlspecialchars($data['kelas_tampil'] ?? '-'); ?>
                                         </td>
 
+                                        <!-- Pelanggaran -->
                                         <td>
                                             <?= htmlspecialchars($data['nama_pelanggaran']); ?>
                                         </td>
 
+                                        <!-- Poin -->
                                         <td>
                                             <?= htmlspecialchars($data['poin']); ?>
                                         </td>
 
+                                        <!-- Tanggal Kejadian -->
                                         <td>
-                                            <?= htmlspecialchars($data['tanggal']); ?>
+                                            <?= !empty($data['tanggal'])
+                                                ? date('d-m-Y', strtotime($data['tanggal']))
+                                                : '-'; ?>
                                         </td>
 
+                                        <!-- Tanggal Dicatat -->
+                                        <td>
+                                            <?= !empty($data['created_at'])
+                                                ? date('d-m-Y H:i', strtotime($data['created_at']))
+                                                : '-'; ?>
+                                        </td>
+
+                                        <!-- Guru -->
                                         <td>
                                             <?= htmlspecialchars($data['nama_guru']); ?>
                                         </td>
 
+                                        <!-- Status -->
                                         <td>
                                             <span class="badge bg-primary">
                                                 <?= htmlspecialchars($data['status']); ?>
                                             </span>
                                         </td>
+
                                     </tr>
 
                                 <?php
+
                                     }
+
                                 } else {
+
                                 ?>
 
                                     <tr>
-                                        <td colspan="8" class="text-center">
+                                        <td colspan="9" class="text-center">
                                             Belum ada data pelanggaran.
                                         </td>
                                     </tr>
@@ -271,56 +328,79 @@ if (!$query) {
                         <div class="d-flex justify-content-end mt-3">
 
                             <nav>
+
                                 <ul class="pagination mb-0">
 
+                                    <!-- Sebelumnya -->
                                     <?php if ($page > 1) { ?>
 
                                         <li class="page-item">
+
                                             <a class="page-link"
                                                 href="?page=<?= $page - 1; ?>&cari=<?= urlencode($cari); ?>">
+
                                                 Sebelumnya
+
                                             </a>
+
                                         </li>
 
                                     <?php } else { ?>
 
                                         <li class="page-item disabled">
-                                            <span class="page-link">Sebelumnya</span>
+
+                                            <span class="page-link">
+                                                Sebelumnya
+                                            </span>
+
                                         </li>
 
                                     <?php } ?>
 
+                                    <!-- Nomor Halaman -->
                                     <?php for ($i = 1; $i <= $total_halaman; $i++) { ?>
 
                                         <li class="page-item <?= ($i == $page) ? 'active' : ''; ?>">
 
                                             <a class="page-link"
                                                 href="?page=<?= $i; ?>&cari=<?= urlencode($cari); ?>">
+
                                                 <?= $i; ?>
+
                                             </a>
 
                                         </li>
 
                                     <?php } ?>
 
+                                    <!-- Berikutnya -->
                                     <?php if ($page < $total_halaman) { ?>
 
                                         <li class="page-item">
+
                                             <a class="page-link"
                                                 href="?page=<?= $page + 1; ?>&cari=<?= urlencode($cari); ?>">
+
                                                 Berikutnya
+
                                             </a>
+
                                         </li>
 
                                     <?php } else { ?>
 
                                         <li class="page-item disabled">
-                                            <span class="page-link">Berikutnya</span>
+
+                                            <span class="page-link">
+                                                Berikutnya
+                                            </span>
+
                                         </li>
 
                                     <?php } ?>
 
                                 </ul>
+
                             </nav>
 
                         </div>
@@ -328,11 +408,13 @@ if (!$query) {
                     <?php } ?>
 
                 </div>
+
             </div>
 
         </main>
 
     </div>
+
 </div>
 
 </body>
