@@ -6,6 +6,7 @@ require_once __DIR__ . "/../../config/koneksi.php";
 $tahun_ajaran_id = isset($_GET['tahun_ajaran_id']) ? (int) $_GET['tahun_ajaran_id'] : 0;
 $kelas_id = isset($_GET['kelas_id']) ? (int) $_GET['kelas_id'] : 0;
 $siswa_id = isset($_GET['siswa_id']) ? (int) $_GET['siswa_id'] : 0;
+
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 
 if ($page < 1) {
@@ -195,11 +196,9 @@ if (!$query) {
 <body>
 <div class="container-fluid">
     <div class="row">
-
         <?php require_once "../../layout/sidebar.php"; ?>
 
         <main class="col-md-9 col-lg-10 main-content">
-
             <div class="mb-4">
                 <h1 class="fw-bold mb-1">Laporan Pelanggaran</h1>
                 <p class="text-muted mb-0">
@@ -298,7 +297,6 @@ if (!$query) {
 
             <div class="card shadow-sm">
                 <div class="card-body">
-
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
                             <h5 class="fw-bold mb-1">
@@ -310,11 +308,18 @@ if (!$query) {
                             </small>
                         </div>
 
-                        <a href="cetak.php?tahun_ajaran_id=<?= $tahun_ajaran_id; ?>&kelas_id=<?= $kelas_id; ?>&siswa_id=<?= $siswa_id; ?>"
-                           target="_blank"
-                           class="btn btn-dark">
-                            <i class="bi bi-printer"></i> Cetak
-                        </a>
+                        <div class="d-flex gap-2">
+                            <a href="export_excel.php?tahun_ajaran_id=<?= $tahun_ajaran_id; ?>&kelas_id=<?= $kelas_id; ?>&siswa_id=<?= $siswa_id; ?>"
+                               class="btn btn-success">
+                                <i class="bi bi-file-earmark-excel"></i> Export Excel
+                            </a>
+
+                            <a href="cetak.php?tahun_ajaran_id=<?= $tahun_ajaran_id; ?>&kelas_id=<?= $kelas_id; ?>&siswa_id=<?= $siswa_id; ?>"
+                               target="_blank"
+                               class="btn btn-dark">
+                                <i class="bi bi-printer"></i> Cetak
+                            </a>
+                        </div>
                     </div>
 
                     <div class="table-responsive">
@@ -354,10 +359,8 @@ if (!$query) {
                                             <td>
                                                 <form method="POST"
                                                       onsubmit="return confirm('Yakin ingin menghapus laporan ini?');">
-
                                                     <input type="hidden" name="hapus_id"
                                                            value="<?= (int) $data['id']; ?>">
-
                                                     <button type="submit" class="btn btn-danger btn-sm">
                                                         <i class="bi bi-trash"></i> Hapus
                                                     </button>
@@ -382,7 +385,6 @@ if (!$query) {
                         <div class="d-flex justify-content-end mt-3">
                             <nav>
                                 <ul class="pagination mb-0">
-
                                     <li class="page-item <?= ($page <= 1) ? 'disabled' : ''; ?>">
                                         <a class="page-link"
                                            href="?tahun_ajaran_id=<?= $tahun_ajaran_id; ?>&kelas_id=<?= $kelas_id; ?>&siswa_id=<?= $siswa_id; ?>&page=<?= $page - 1; ?>">
@@ -405,15 +407,12 @@ if (!$query) {
                                             Berikutnya
                                         </a>
                                     </li>
-
                                 </ul>
                             </nav>
                         </div>
                     <?php } ?>
-
                 </div>
             </div>
-
         </main>
     </div>
 </div>

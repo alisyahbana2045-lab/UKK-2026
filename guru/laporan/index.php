@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/../../config/session.php";
 require_once __DIR__ . "/../../config/koneksi.php";
@@ -11,18 +12,25 @@ $guru_query = mysqli_query($conn, "
     LIMIT 1
 ");
 
+if (!$guru_query) {
+    die("Query guru gagal: " . mysqli_error($conn));
+}
+
 $guru = mysqli_fetch_assoc($guru_query);
 
 if (!$guru) {
-    die("Data guru tidak ditemukan.");
+    die("Data guru tidak ditemukan. Pastikan user_id pada tabel t_guru sesuai dengan akun yang login.");
 }
 
 $guru_id = (int) $guru['id'];
 
 $wali_query = mysqli_query($conn, "
-    SELECT wk.id, wk.tahun_ajaran_id, wk.kelas_id,
-           ta.nama AS nama_tahun_ajaran,
-           k.nama AS nama_kelas
+    SELECT
+        wk.id,
+        wk.tahun_ajaran_id,
+        wk.kelas_id,
+        ta.nama AS nama_tahun_ajaran,
+        k.nama AS nama_kelas
     FROM t_wali_kelas wk
     INNER JOIN t_tahun_ajaran ta ON wk.tahun_ajaran_id = ta.id
     INNER JOIN t_kelas k ON wk.kelas_id = k.id
@@ -30,6 +38,10 @@ $wali_query = mysqli_query($conn, "
     AND wk.status_aktif = 1
     LIMIT 1
 ");
+
+if (!$wali_query) {
+    die("Query wali kelas gagal: " . mysqli_error($conn));
+}
 
 $wali = mysqli_fetch_assoc($wali_query);
 
@@ -44,6 +56,7 @@ $wali_kelas_id = (int) $wali['kelas_id'];
 $tahun_ajaran_id = isset($_GET['tahun_ajaran_id']) ? (int) $_GET['tahun_ajaran_id'] : $wali_tahun_ajaran_id;
 $kelas_id = isset($_GET['kelas_id']) ? (int) $_GET['kelas_id'] : $wali_kelas_id;
 $siswa_id = isset($_GET['siswa_id']) ? (int) $_GET['siswa_id'] : 0;
+
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 
 if ($page < 1) {
@@ -53,6 +66,7 @@ if ($page < 1) {
 $per_page = 10;
 $offset = ($page - 1) * $per_page;
 
+// Laporan hanya untuk kelas yang sedang diwalikan
 $where = "
     WHERE ps.tahun_ajaran_id = $wali_tahun_ajaran_id
     AND ps.kelas_id = $wali_kelas_id
@@ -88,6 +102,10 @@ $count_query = mysqli_query($conn, "
     FROM t_pelanggaran_siswa ps
     $where
 ");
+
+if (!$count_query) {
+    die("Query total gagal: " . mysqli_error($conn));
+}
 
 $count_data = mysqli_fetch_assoc($count_query);
 $total_data = (int) $count_data['total'];
@@ -130,10 +148,12 @@ if (!$query) {
     <title>Laporan - Sistem Pelanggaran Siswa</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
     <style>
         body {
             background-color: #f1f3f5;
         }
+
         .sidebar {
             position: fixed;
             top: 0;
@@ -142,24 +162,29 @@ if (!$query) {
             overflow-y: auto;
             z-index: 1000;
         }
+
         .main-content {
             margin-left: 16.666667%;
             padding: 30px;
         }
+
         .menu-sidebar {
             color: white;
             background-color: transparent;
             transition: 0.3s;
         }
+
         .menu-sidebar:hover,
         .menu-sidebar.active {
             color: white;
             background-color: #0d6efd;
         }
+
         .stat-card {
             border: none;
             border-radius: 12px;
         }
+
         .stat-icon {
             width: 50px;
             height: 50px;
@@ -171,11 +196,13 @@ if (!$query) {
             color: white;
             font-size: 22px;
         }
+
         .table th {
             background-color: #212529;
             color: white;
             white-space: nowrap;
         }
+
         @media (max-width: 991.98px) {
             .main-content {
                 margin-left: 25%;
@@ -183,8 +210,8 @@ if (!$query) {
         }
     </style>
 </head>
-<body>
 
+<body>
 <div class="container-fluid">
     <div class="row">
         <?php require_once "../../layout/sidebar.php"; ?>
@@ -233,9 +260,8 @@ if (!$query) {
                         <div class="col-md-3">
                             <label class="form-label">Tahun Ajaran</label>
                             <select name="tahun_ajaran_id" class="form-select">
-                                <option value="0">Semua Tahun Ajaran</option>
                                 <?php while ($ta = mysqli_fetch_assoc($tahun_ajaran)) { ?>
-                                    <option value="<?= $ta['id']; ?>" <?= ($tahun_ajaran_id == $ta['id']) ? 'selected' : ''; ?>>
+                                    <option value="<?= $ta['id']; ?>" selected>
                                         <?= htmlspecialchars($ta['nama']); ?>
                                     </option>
                                 <?php } ?>
@@ -245,9 +271,8 @@ if (!$query) {
                         <div class="col-md-3">
                             <label class="form-label">Kelas</label>
                             <select name="kelas_id" class="form-select">
-                                <option value="0">Semua Kelas</option>
                                 <?php while ($k = mysqli_fetch_assoc($kelas)) { ?>
-                                    <option value="<?= $k['id']; ?>" <?= ($kelas_id == $k['id']) ? 'selected' : ''; ?>>
+                                    <option value="<?= $k['id']; ?>" selected>
                                         <?= htmlspecialchars($k['nama']); ?>
                                     </option>
                                 <?php } ?>
@@ -291,11 +316,18 @@ if (!$query) {
                             </small>
                         </div>
 
-                        <a href="cetak.php?tahun_ajaran_id=<?= $tahun_ajaran_id; ?>&kelas_id=<?= $kelas_id; ?>&siswa_id=<?= $siswa_id; ?>"
-                           target="_blank"
-                           class="btn btn-dark">
-                            <i class="bi bi-printer"></i> Cetak
-                        </a>
+                        <div class="d-flex gap-2">
+                            <a href="export_excel.php?siswa_id=<?= $siswa_id; ?>"
+                               class="btn btn-success">
+                                <i class="bi bi-file-earmark-excel"></i> Export Excel
+                            </a>
+
+                            <a href="cetak.php?tahun_ajaran_id=<?= $wali_tahun_ajaran_id; ?>&kelas_id=<?= $wali_kelas_id; ?>&siswa_id=<?= $siswa_id; ?>"
+                               target="_blank"
+                               class="btn btn-dark">
+                                <i class="bi bi-printer"></i> Cetak
+                            </a>
+                        </div>
                     </div>
 
                     <div class="table-responsive">
@@ -312,9 +344,11 @@ if (!$query) {
                                     <th>Tindakan</th>
                                 </tr>
                             </thead>
+
                             <tbody>
                                 <?php if (mysqli_num_rows($query) > 0) { ?>
                                     <?php $no = $offset + 1; ?>
+
                                     <?php while ($data = mysqli_fetch_assoc($query)) { ?>
                                         <tr>
                                             <td><?= $no++; ?></td>
@@ -331,6 +365,7 @@ if (!$query) {
                                             <td><?= htmlspecialchars($data['tindakan'] ?: '-'); ?></td>
                                         </tr>
                                     <?php } ?>
+
                                 <?php } else { ?>
                                     <tr>
                                         <td colspan="8" class="text-center py-4 text-muted">
@@ -349,7 +384,7 @@ if (!$query) {
                                 <ul class="pagination mb-0">
                                     <li class="page-item <?= ($page <= 1) ? 'disabled' : ''; ?>">
                                         <a class="page-link"
-                                           href="?tahun_ajaran_id=<?= $tahun_ajaran_id; ?>&kelas_id=<?= $kelas_id; ?>&siswa_id=<?= $siswa_id; ?>&page=<?= $page - 1; ?>">
+                                           href="?siswa_id=<?= $siswa_id; ?>&page=<?= $page - 1; ?>">
                                             Sebelumnya
                                         </a>
                                     </li>
@@ -357,7 +392,7 @@ if (!$query) {
                                     <?php for ($i = 1; $i <= $total_pages; $i++) { ?>
                                         <li class="page-item <?= ($page == $i) ? 'active' : ''; ?>">
                                             <a class="page-link"
-                                               href="?tahun_ajaran_id=<?= $tahun_ajaran_id; ?>&kelas_id=<?= $kelas_id; ?>&siswa_id=<?= $siswa_id; ?>&page=<?= $i; ?>">
+                                               href="?siswa_id=<?= $siswa_id; ?>&page=<?= $i; ?>">
                                                 <?= $i; ?>
                                             </a>
                                         </li>
@@ -365,7 +400,7 @@ if (!$query) {
 
                                     <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : ''; ?>">
                                         <a class="page-link"
-                                           href="?tahun_ajaran_id=<?= $tahun_ajaran_id; ?>&kelas_id=<?= $kelas_id; ?>&siswa_id=<?= $siswa_id; ?>&page=<?= $page + 1; ?>">
+                                           href="?siswa_id=<?= $siswa_id; ?>&page=<?= $page + 1; ?>">
                                             Berikutnya
                                         </a>
                                     </li>
