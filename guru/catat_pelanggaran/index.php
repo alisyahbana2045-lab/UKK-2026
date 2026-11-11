@@ -185,7 +185,7 @@ if (!$query) {
                 <div class="card-body">
 
                     <form method="GET" class="d-flex gap-2">
-
+                    
                         <input
                             type="text"
                             name="cari"
@@ -212,7 +212,12 @@ if (!$query) {
             <div class="card shadow-sm">
 
                 <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold mb-1">
+                    Riwayat Pelanggaran
+                    </h2>
 
+                </div>
                     <div class="table-responsive">
 
                         <table class="table table-bordered table-hover align-middle">

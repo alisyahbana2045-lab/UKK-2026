@@ -12,16 +12,23 @@ if ($page < 1) {
     $page = 1;
 }
 
+// Hanya menampilkan pelanggaran yang belum ditindak
 $where = "WHERE guru_id IN (
     SELECT id FROM t_guru WHERE user_id = '$user_id'
 )
+AND status = 'Belum Ditindak'
 AND (
     nama_siswa LIKE '%$cari%'
     OR nama_pelanggaran LIKE '%$cari%'
     OR nama_kelas LIKE '%$cari%'
 )";
 
-$query_jumlah = mysqli_query($conn, "SELECT COUNT(*) AS total FROM t_pelanggaran_siswa $where");
+// Menghitung jumlah data
+$query_jumlah = mysqli_query($conn, "
+    SELECT COUNT(*) AS total
+    FROM t_pelanggaran_siswa
+    $where
+");
 
 if (!$query_jumlah) {
     die("Query gagal: " . mysqli_error($conn));
@@ -36,10 +43,13 @@ if ($total_halaman > 0 && $page > $total_halaman) {
 
 $offset = ($page - 1) * $per_page;
 
-$query = mysqli_query($conn, "SELECT * FROM t_pelanggaran_siswa
+// Mengambil data pelanggaran yang belum ditindak
+$query = mysqli_query($conn, "
+    SELECT * FROM t_pelanggaran_siswa
     $where
     ORDER BY id DESC
-    LIMIT $offset, $per_page");
+    LIMIT $offset, $per_page
+");
 
 if (!$query) {
     die("Query gagal: " . mysqli_error($conn));
@@ -48,13 +58,16 @@ if (!$query) {
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Tindakan - Sistem Pelanggaran Siswa</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <style>
         .sidebar {
@@ -109,9 +122,12 @@ if (!$query) {
                 </div>
             </div>
 
+            <!-- FORM PENCARIAN -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
+
                     <form method="GET" class="d-flex gap-2">
+
                         <input type="text"
                                name="cari"
                                class="form-control"
@@ -125,15 +141,20 @@ if (!$query) {
                         <a href="index.php" class="btn btn-secondary">
                             Reset
                         </a>
+
                     </form>
+
                 </div>
             </div>
 
+            <!-- TABEL TINDAKAN -->
             <div class="card shadow-sm">
                 <div class="card-body">
 
                     <div class="table-responsive">
+
                         <table class="table table-bordered table-hover align-middle">
+
                             <thead class="table-dark">
                                 <tr>
                                     <th>No</th>
@@ -148,6 +169,7 @@ if (!$query) {
                             </thead>
 
                             <tbody>
+
                                 <?php
                                 $no = $offset + 1;
 
@@ -155,6 +177,7 @@ if (!$query) {
                                 ?>
 
                                     <tr>
+
                                         <td><?= $no++; ?></td>
 
                                         <td>
@@ -178,123 +201,119 @@ if (!$query) {
                                         </td>
 
                                         <td>
-                                            <?php if ($data['status'] == 'Belum Ditindak') { ?>
-
-                                                <span class="badge bg-warning text-dark">
-                                                    Belum Ditindak
-                                                </span>
-
-                                            <?php } else { ?>
-
-                                                <span class="badge bg-success">
-                                                    Sudah Ditindak
-                                                </span>
-
-                                            <?php } ?>
+                                            <span class="badge bg-warning text-dark">
+                                                Belum Ditindak
+                                            </span>
                                         </td>
 
                                         <td>
-                                            <?php if ($data['status'] == 'Belum Ditindak') { ?>
 
-                                                <button type="button"
-                                                        class="btn btn-sm btn-primary"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#modalTindakan<?= $data['id']; ?>">
-                                                    Beri Tindakan
-                                                </button>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-primary"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalTindakan<?= $data['id']; ?>">
 
-                                                <div class="modal fade"
-                                                     id="modalTindakan<?= $data['id']; ?>"
-                                                     tabindex="-1">
+                                                Beri Tindakan
 
-                                                    <div class="modal-dialog">
-                                                        <div class="modal-content">
+                                            </button>
 
-                                                            <form action="proses.php" method="POST">
+                                            <!-- MODAL TINDAKAN -->
+                                            <div class="modal fade"
+                                                 id="modalTindakan<?= $data['id']; ?>"
+                                                 tabindex="-1">
 
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title">
-                                                                        Beri Tindakan
-                                                                    </h5>
+                                                <div class="modal-dialog">
 
-                                                                    <button type="button"
-                                                                            class="btn-close"
-                                                                            data-bs-dismiss="modal">
-                                                                    </button>
-                                                                </div>
+                                                    <div class="modal-content">
 
-                                                                <div class="modal-body">
+                                                        <form action="proses.php" method="POST">
 
-                                                                    <input type="hidden"
-                                                                           name="id"
-                                                                           value="<?= $data['id']; ?>">
+                                                            <div class="modal-header">
 
-                                                                    <div class="mb-3">
-                                                                        <label class="form-label">
-                                                                            Nama Siswa
-                                                                        </label>
+                                                                <h5 class="modal-title">
+                                                                    Beri Tindakan
+                                                                </h5>
 
-                                                                        <input type="text"
-                                                                               class="form-control"
-                                                                               value="<?= htmlspecialchars($data['nama_siswa']); ?>"
-                                                                               readonly>
-                                                                    </div>
+                                                                <button type="button"
+                                                                        class="btn-close"
+                                                                        data-bs-dismiss="modal">
+                                                                </button>
 
-                                                                    <div class="mb-3">
-                                                                        <label class="form-label">
-                                                                            Pelanggaran
-                                                                        </label>
+                                                            </div>
 
-                                                                        <input type="text"
-                                                                               class="form-control"
-                                                                               value="<?= htmlspecialchars($data['nama_pelanggaran']); ?>"
-                                                                               readonly>
-                                                                    </div>
+                                                            <div class="modal-body">
 
-                                                                    <div class="mb-3">
-                                                                        <label class="form-label">
-                                                                            Tindakan
-                                                                        </label>
+                                                                <input type="hidden"
+                                                                       name="id"
+                                                                       value="<?= $data['id']; ?>">
 
-                                                                        <textarea name="tindakan"
-                                                                                  class="form-control"
-                                                                                  rows="3"
-                                                                                  placeholder="Masukkan tindakan yang diberikan..."
-                                                                                  required></textarea>
-                                                                    </div>
+                                                                <div class="mb-3">
+
+                                                                    <label class="form-label">
+                                                                        Nama Siswa
+                                                                    </label>
+
+                                                                    <input type="text"
+                                                                           class="form-control"
+                                                                           value="<?= htmlspecialchars($data['nama_siswa']); ?>"
+                                                                           readonly>
 
                                                                 </div>
 
-                                                                <div class="modal-footer">
+                                                                <div class="mb-3">
 
-                                                                    <button type="button"
-                                                                            class="btn btn-secondary"
-                                                                            data-bs-dismiss="modal">
-                                                                        Batal
-                                                                    </button>
+                                                                    <label class="form-label">
+                                                                        Pelanggaran
+                                                                    </label>
 
-                                                                    <button type="submit"
-                                                                            class="btn btn-primary">
-                                                                        Simpan Tindakan
-                                                                    </button>
+                                                                    <input type="text"
+                                                                           class="form-control"
+                                                                           value="<?= htmlspecialchars($data['nama_pelanggaran']); ?>"
+                                                                           readonly>
 
                                                                 </div>
 
-                                                            </form>
+                                                                <div class="mb-3">
 
-                                                        </div>
+                                                                    <label class="form-label">
+                                                                        Tindakan
+                                                                    </label>
+
+                                                                    <textarea name="tindakan"
+                                                                              class="form-control"
+                                                                              rows="3"
+                                                                              placeholder="Masukkan tindakan yang diberikan..."
+                                                                              required></textarea>
+
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div class="modal-footer">
+
+                                                                <button type="button"
+                                                                        class="btn btn-secondary"
+                                                                        data-bs-dismiss="modal">
+                                                                    Batal
+                                                                </button>
+
+                                                                <button type="submit"
+                                                                        class="btn btn-primary">
+                                                                    Simpan Tindakan
+                                                                </button>
+
+                                                            </div>
+
+                                                        </form>
+
                                                     </div>
 
                                                 </div>
 
-                                            <?php } else { ?>
+                                            </div>
 
-                                                <span class="text-success">
-                                                    <?= htmlspecialchars($data['tindakan']); ?>
-                                                </span>
-
-                                            <?php } ?>
                                         </td>
+
                                     </tr>
 
                                 <?php } ?>
@@ -302,18 +321,22 @@ if (!$query) {
                                 <?php if (mysqli_num_rows($query) == 0) { ?>
 
                                     <tr>
-                                        <td colspan="8" class="text-center text-muted">
-                                            Belum ada data pelanggaran.
+                                        <td colspan="8" class="text-center text-muted py-4">
+                                            Tidak ada pelanggaran yang belum ditindak.
                                         </td>
                                     </tr>
 
                                 <?php } ?>
+
                             </tbody>
+
                         </table>
+
                     </div>
 
                     <!-- PAGINATION -->
                     <div class="d-flex justify-content-end mt-3">
+
                         <nav>
                             <ul class="pagination mb-0">
 
@@ -339,10 +362,12 @@ if (!$query) {
                                 <?php for ($i = 1; $i <= $total_halaman; $i++) { ?>
 
                                     <li class="page-item <?= ($i == $page) ? 'active' : ''; ?>">
+
                                         <a class="page-link"
                                            href="?page=<?= $i; ?>&cari=<?= urlencode($cari); ?>">
                                             <?= $i; ?>
                                         </a>
+
                                     </li>
 
                                 <?php } ?>
@@ -368,6 +393,7 @@ if (!$query) {
 
                             </ul>
                         </nav>
+
                     </div>
 
                 </div>

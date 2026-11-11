@@ -248,7 +248,7 @@ if ($_SESSION['user_role'] == 'guru') {
                 <a href="/UKK-2026/guru/catat_pelanggaran/index.php"
                    class="nav-link menu-sidebar <?= strpos($current_page, '/guru/catat_pelanggaran/') !== false ? 'active' : ''; ?>">
                     <i class="bi bi-clipboard2-plus-fill"></i>
-                    <span>Catat Pelanggaran</span>
+                    <span>Riwayat dan Catat Pelanggaran</span>
                 </a>
             </li>
 
