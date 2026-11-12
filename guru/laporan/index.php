@@ -53,9 +53,10 @@ if (!$wali) {
 $wali_tahun_ajaran_id = (int) $wali['tahun_ajaran_id'];
 $wali_kelas_id = (int) $wali['kelas_id'];
 
-$tahun_ajaran_id = isset($_GET['tahun_ajaran_id']) ? (int) $_GET['tahun_ajaran_id'] : $wali_tahun_ajaran_id;
-$kelas_id = isset($_GET['kelas_id']) ? (int) $_GET['kelas_id'] : $wali_kelas_id;
+$tahun_ajaran_id = $wali_tahun_ajaran_id;
+$kelas_id = $wali_kelas_id;
 $siswa_id = isset($_GET['siswa_id']) ? (int) $_GET['siswa_id'] : 0;
+$tanggal = isset($_GET['tanggal']) ? trim($_GET['tanggal']) : '';
 
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 
@@ -65,6 +66,11 @@ if ($page < 1) {
 
 $per_page = 10;
 $offset = ($page - 1) * $per_page;
+
+// Validasi tanggal
+if ($tanggal != '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) {
+    $tanggal = '';
+}
 
 // Laporan hanya untuk kelas yang sedang diwalikan
 $where = "
@@ -76,6 +82,12 @@ if ($siswa_id > 0) {
     $where .= " AND ps.siswa_id = $siswa_id";
 }
 
+if ($tanggal != '') {
+    $tanggal_sql = mysqli_real_escape_string($conn, $tanggal);
+    $where .= " AND DATE(ps.tanggal) = '$tanggal_sql'";
+}
+
+// Data dropdown
 $tahun_ajaran = mysqli_query($conn, "
     SELECT id, nama
     FROM t_tahun_ajaran
@@ -97,6 +109,7 @@ $siswa = mysqli_query($conn, "
     ORDER BY s.nama ASC
 ");
 
+// Hitung jumlah laporan
 $count_query = mysqli_query($conn, "
     SELECT COUNT(*) AS total
     FROM t_pelanggaran_siswa ps
@@ -109,17 +122,29 @@ if (!$count_query) {
 
 $count_data = mysqli_fetch_assoc($count_query);
 $total_data = (int) $count_data['total'];
-$total_pages = $total_data > 0 ? ceil($total_data / $per_page) : 1;
+$total_pages = $total_data > 0 ? (int) ceil($total_data / $per_page) : 1;
 
+if ($page > $total_pages) {
+    $page = $total_pages;
+}
+
+$offset = ($page - 1) * $per_page;
+
+// Hitung total poin
 $total_poin_query = mysqli_query($conn, "
     SELECT COALESCE(SUM(ps.poin), 0) AS total_poin
     FROM t_pelanggaran_siswa ps
     $where
 ");
 
+if (!$total_poin_query) {
+    die("Query total poin gagal: " . mysqli_error($conn));
+}
+
 $total_poin_data = mysqli_fetch_assoc($total_poin_query);
 $total_poin = (int) $total_poin_data['total_poin'];
 
+// Ambil data laporan
 $query = mysqli_query($conn, "
     SELECT
         ps.*,
@@ -256,10 +281,10 @@ if (!$query) {
 
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
-                    <form method="GET" class="row g-2">
+                    <form method="GET" class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label">Tahun Ajaran</label>
-                            <select name="tahun_ajaran_id" class="form-select">
+                            <select name="tahun_ajaran_id" class="form-select" disabled>
                                 <?php while ($ta = mysqli_fetch_assoc($tahun_ajaran)) { ?>
                                     <option value="<?= $ta['id']; ?>" selected>
                                         <?= htmlspecialchars($ta['nama']); ?>
@@ -270,7 +295,7 @@ if (!$query) {
 
                         <div class="col-md-3">
                             <label class="form-label">Kelas</label>
-                            <select name="kelas_id" class="form-select">
+                            <select name="kelas_id" class="form-select" disabled>
                                 <?php while ($k = mysqli_fetch_assoc($kelas)) { ?>
                                     <option value="<?= $k['id']; ?>" selected>
                                         <?= htmlspecialchars($k['nama']); ?>
@@ -291,7 +316,13 @@ if (!$query) {
                             </select>
                         </div>
 
-                        <div class="col-md-3 d-flex align-items-end gap-2">
+                        <div class="col-md-3">
+                            <label class="form-label">Tanggal</label>
+                            <input type="date" name="tanggal" class="form-control"
+                                   value="<?= htmlspecialchars($tanggal); ?>">
+                        </div>
+
+                        <div class="col-12 d-flex align-items-end gap-2">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-search"></i> Cari
                             </button>
@@ -317,14 +348,19 @@ if (!$query) {
                         </div>
 
                         <div class="d-flex gap-2">
-                            <a href="export_excel.php?siswa_id=<?= $siswa_id; ?>"
-                               class="btn btn-success">
+                            <a href="export_excel.php?<?= http_build_query([
+                                'siswa_id' => $siswa_id,
+                                'tanggal' => $tanggal
+                            ]); ?>" class="btn btn-success">
                                 <i class="bi bi-file-earmark-excel"></i> Export Excel
                             </a>
 
-                            <a href="cetak.php?tahun_ajaran_id=<?= $wali_tahun_ajaran_id; ?>&kelas_id=<?= $wali_kelas_id; ?>&siswa_id=<?= $siswa_id; ?>"
-                               target="_blank"
-                               class="btn btn-dark">
+                            <a href="cetak.php?<?= http_build_query([
+                                'tahun_ajaran_id' => $wali_tahun_ajaran_id,
+                                'kelas_id' => $wali_kelas_id,
+                                'siswa_id' => $siswa_id,
+                                'tanggal' => $tanggal
+                            ]); ?>" target="_blank" class="btn btn-dark">
                                 <i class="bi bi-printer"></i> Cetak
                             </a>
                         </div>
@@ -383,24 +419,33 @@ if (!$query) {
                             <nav>
                                 <ul class="pagination mb-0">
                                     <li class="page-item <?= ($page <= 1) ? 'disabled' : ''; ?>">
-                                        <a class="page-link"
-                                           href="?siswa_id=<?= $siswa_id; ?>&page=<?= $page - 1; ?>">
+                                        <a class="page-link" href="?<?= http_build_query([
+                                            'siswa_id' => $siswa_id,
+                                            'tanggal' => $tanggal,
+                                            'page' => $page - 1
+                                        ]); ?>">
                                             Sebelumnya
                                         </a>
                                     </li>
 
                                     <?php for ($i = 1; $i <= $total_pages; $i++) { ?>
                                         <li class="page-item <?= ($page == $i) ? 'active' : ''; ?>">
-                                            <a class="page-link"
-                                               href="?siswa_id=<?= $siswa_id; ?>&page=<?= $i; ?>">
+                                            <a class="page-link" href="?<?= http_build_query([
+                                                'siswa_id' => $siswa_id,
+                                                'tanggal' => $tanggal,
+                                                'page' => $i
+                                            ]); ?>">
                                                 <?= $i; ?>
                                             </a>
                                         </li>
                                     <?php } ?>
 
                                     <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : ''; ?>">
-                                        <a class="page-link"
-                                           href="?siswa_id=<?= $siswa_id; ?>&page=<?= $page + 1; ?>">
+                                        <a class="page-link" href="?<?= http_build_query([
+                                            'siswa_id' => $siswa_id,
+                                            'tanggal' => $tanggal,
+                                            'page' => $page + 1
+                                        ]); ?>">
                                             Berikutnya
                                         </a>
                                     </li>

@@ -1,4 +1,3 @@
-
 <?php
 require_once __DIR__ . "/../../config/session.php";
 require_once __DIR__ . "/../../config/koneksi.php";
@@ -48,6 +47,7 @@ $wali_tahun_ajaran_id = (int) $wali['tahun_ajaran_id'];
 $wali_kelas_id = (int) $wali['kelas_id'];
 
 $siswa_id = isset($_GET['siswa_id']) ? (int) $_GET['siswa_id'] : 0;
+$tanggal = isset($_GET['tanggal']) ? trim($_GET['tanggal']) : '';
 
 // Filter wajib sesuai kelas wali
 $where = "
@@ -57,6 +57,16 @@ $where = "
 
 if ($siswa_id > 0) {
     $where .= " AND ps.siswa_id = $siswa_id";
+}
+
+// Filter berdasarkan satu tanggal
+if ($tanggal !== '') {
+    $tanggal_valid = DateTime::createFromFormat('Y-m-d', $tanggal);
+
+    if ($tanggal_valid && $tanggal_valid->format('Y-m-d') === $tanggal) {
+        $tanggal_sql = mysqli_real_escape_string($conn, $tanggal);
+        $where .= " AND ps.tanggal = '$tanggal_sql'";
+    }
 }
 
 // Ambil data laporan
@@ -98,6 +108,13 @@ header("Expires: 0");
             Guru: <?= htmlspecialchars($guru['nama']); ?>
         </th>
     </tr>
+    <?php if ($tanggal !== '') { ?>
+        <tr>
+            <th colspan="10">
+                Tanggal: <?= htmlspecialchars(date('d-m-Y', strtotime($tanggal))); ?>
+            </th>
+        </tr>
+    <?php } ?>
     <tr>
         <th>No</th>
         <th>Tanggal</th>
@@ -116,7 +133,7 @@ header("Expires: 0");
     <?php while ($data = mysqli_fetch_assoc($query)) { ?>
         <tr>
             <td><?= $no++; ?></td>
-            <td><?= htmlspecialchars($data['tanggal'] ?? '-'); ?></td>
+            <td><?= date('d-m-Y', strtotime($data['tanggal'])); ?></td>
             <td><?= htmlspecialchars($data['nama_tahun_ajaran'] ?? '-'); ?></td>
             <td><?= htmlspecialchars($data['nama_kelas'] ?? '-'); ?></td>
             <td><?= htmlspecialchars($data['nama_siswa'] ?? '-'); ?></td>

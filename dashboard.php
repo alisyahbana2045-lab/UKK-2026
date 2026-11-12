@@ -1,27 +1,256 @@
 <?php
 require_once "config/session.php";
 require_once "config/koneksi.php";
+require_once "config/akses.php";
+
+$nama_role = 'Guru';
+
+if ($user_role == 'admin') {
+    $nama_role = 'Admin';
+} elseif ($is_wali_kelas) {
+    $nama_role = 'Wali Kelas';
+}
+
 
 function hitung($conn, $query) {
     $result = mysqli_query($conn, $query);
     if (!$result) return 0;
     $data = mysqli_fetch_assoc($result);
-    return $data['total'];
+    return (int) ($data['total'] ?? 0);
 }
 
-$total_siswa = hitung($conn, "SELECT COUNT(*) AS total FROM t_siswa WHERE status_aktif = 1");
-$total_guru = hitung($conn, "SELECT COUNT(*) AS total FROM t_guru WHERE status_aktif = 1");
-$total_pelanggaran = hitung($conn, "SELECT COUNT(*) AS total FROM t_pelanggaran_siswa");
-$total_kelas = hitung($conn, "SELECT COUNT(*) AS total FROM t_kelas");
-$total_jenis = hitung($conn, "SELECT COUNT(*) AS total FROM t_pelanggaran WHERE status_aktif = 1");
+// Menentukan filter berdasarkan role
+if ($user_role == 'admin') {
 
+    $filter_pelanggaran = "1=1";
+
+} elseif ($is_wali_kelas) {
+
+    $filter_pelanggaran = "
+        kelas_id = " . (int) $kelas_id . "
+        AND tahun_ajaran_id = " . (int) $tahun_ajaran_id;
+
+} else {
+
+    $filter_pelanggaran = $guru_id
+        ? "guru_id = " . (int) $guru_id
+        : "1=0";
+}
+
+// Statistik siswa
+if ($user_role == 'admin') {
+
+    $total_siswa = hitung($conn, "
+        SELECT COUNT(*) AS total
+        FROM t_siswa
+        WHERE status_aktif = 1
+    ");
+
+} elseif ($is_wali_kelas) {
+
+    $total_siswa = hitung($conn, "
+        SELECT COUNT(DISTINCT ks.siswa_id) AS total
+        FROM t_kelas_siswa ks
+        INNER JOIN t_siswa s ON ks.siswa_id = s.id
+        WHERE ks.kelas_id = " . (int) $kelas_id . "
+        AND ks.tahun_ajaran_id = " . (int) $tahun_ajaran_id . "
+        AND ks.status_aktif = 1
+        AND s.status_aktif = 1
+        AND CURDATE() BETWEEN ks.tanggal_mulai
+        AND ks.tanggal_selesai
+    ");
+
+} else {
+
+    $total_siswa = hitung($conn, "
+        SELECT COUNT(DISTINCT siswa_id) AS total
+        FROM t_pelanggaran_siswa
+        WHERE $filter_pelanggaran
+    ");
+}
+
+// Statistik guru
+$total_guru = hitung($conn, "
+    SELECT COUNT(*) AS total
+    FROM t_guru
+    WHERE status_aktif = 1
+");
+
+// Statistik pelanggaran
+$total_pelanggaran = hitung($conn, "
+    SELECT COUNT(*) AS total
+    FROM t_pelanggaran_siswa
+    WHERE $filter_pelanggaran
+");
+
+// Total poin
+$total_poin = hitung($conn, "
+    SELECT COALESCE(SUM(poin), 0) AS total
+    FROM t_pelanggaran_siswa
+    WHERE $filter_pelanggaran
+");
+
+// Total tindakan
+$total_tindakan = hitung($conn, "
+    SELECT COUNT(*) AS total
+    FROM t_pelanggaran_siswa
+    WHERE $filter_pelanggaran
+    AND tindakan IS NOT NULL
+    AND TRIM(tindakan) != ''
+");
+
+// Total kelas
+$total_kelas = hitung($conn, "
+    SELECT COUNT(*) AS total
+    FROM t_kelas
+");
+
+// Tahun ajaran aktif
 $tahun_aktif = mysqli_query($conn, "
     SELECT nama
     FROM t_tahun_ajaran
     WHERE status_aktif = 1
-    ORDER BY id DESC
     LIMIT 1
 ");
+
+if (!$tahun_aktif) {
+    die("Error tahun ajaran: " . mysqli_error($conn));
+}
+
+$data_tahun = mysqli_fetch_assoc($tahun_aktif);
+
+$nama_tahun = $data_tahun['nama'] ?? '-';
+
+// Grafik pelanggaran 7 hari terakhir
+$chart_labels = [];
+$chart_data = [];
+
+for ($i = 6; $i >= 0; $i--) {
+
+    $tanggal = date('Y-m-d', strtotime("-$i days"));
+
+    $chart_labels[] = date('d M', strtotime($tanggal));
+
+    $query_chart = mysqli_query($conn, "
+        SELECT COUNT(*) AS total
+        FROM t_pelanggaran_siswa
+        WHERE tanggal = '$tanggal'
+        AND $filter_pelanggaran
+    ");
+
+    $data_chart = mysqli_fetch_assoc($query_chart);
+
+    $chart_data[] = (int) ($data_chart['total'] ?? 0);
+}
+
+// Pelanggaran terbanyak
+$pelanggaran_terbanyak = mysqli_query($conn, "
+    SELECT nama_pelanggaran, COUNT(*) AS jumlah
+    FROM t_pelanggaran_siswa
+    WHERE $filter_pelanggaran
+    GROUP BY nama_pelanggaran
+    ORDER BY jumlah DESC
+    LIMIT 5
+");
+
+// Aktivitas terbaru
+$aktivitas = mysqli_query($conn, "
+    SELECT nama_siswa, nama_pelanggaran, tanggal, nama_guru
+    FROM t_pelanggaran_siswa
+    WHERE $filter_pelanggaran
+    ORDER BY id DESC
+    LIMIT 5
+");
+
+// Pengaturan kartu statistik berdasarkan role
+if ($user_role == 'admin') {
+
+    $kartu_statistik = [
+        [
+            'judul' => 'Total Siswa',
+            'angka' => $total_siswa,
+            'keterangan' => 'Siswa aktif',
+            'icon' => 'bi-people-fill'
+        ],
+        [
+            'judul' => 'Total Guru',
+            'angka' => $total_guru,
+            'keterangan' => 'Guru aktif',
+            'icon' => 'bi-person-badge-fill'
+        ],
+        [
+            'judul' => 'Total Pelanggaran',
+            'angka' => $total_pelanggaran,
+            'keterangan' => 'Seluruh sekolah',
+            'icon' => 'bi-exclamation-triangle-fill'
+        ],
+        [
+            'judul' => 'Tahun Ajaran Aktif',
+            'angka' => $nama_tahun,
+            'keterangan' => 'Tahun ajaran',
+            'icon' => 'bi-calendar-event-fill'
+        ]
+    ];
+
+} elseif ($is_wali_kelas) {
+
+    $kartu_statistik = [
+        [
+            'judul' => 'Total Siswa Kelas',
+            'angka' => $total_siswa,
+            'keterangan' => 'Siswa di kelas sendiri',
+            'icon' => 'bi-people-fill'
+        ],
+        [
+            'judul' => 'Pelanggaran Kelas',
+            'angka' => $total_pelanggaran,
+            'keterangan' => 'Pelanggaran kelas sendiri',
+            'icon' => 'bi-exclamation-triangle-fill'
+        ],
+        [
+            'judul' => 'Total Poin Kelas',
+            'angka' => $total_poin,
+            'keterangan' => 'Akumulasi poin kelas',
+            'icon' => 'bi-star-fill'
+        ],
+        [
+            'judul' => 'Total Tindakan',
+            'angka' => $total_tindakan,
+            'keterangan' => 'Tindakan tercatat',
+            'icon' => 'bi-hammer'
+        ]
+    ];
+
+} else {
+
+    $kartu_statistik = [
+        [
+            'judul' => 'Siswa Dicatat',
+            'angka' => $total_siswa,
+            'keterangan' => 'Siswa yang pernah dicatat',
+            'icon' => 'bi-people-fill'
+        ],
+        [
+            'judul' => 'Pelanggaran Saya',
+            'angka' => $total_pelanggaran,
+            'keterangan' => 'Pelanggaran yang dicatat',
+            'icon' => 'bi-exclamation-triangle-fill'
+        ],
+        [
+            'judul' => 'Total Poin',
+            'angka' => $total_poin,
+            'keterangan' => 'Akumulasi poin pencatatan',
+            'icon' => 'bi-star-fill'
+        ],
+        [
+            'judul' => 'Total Tindakan',
+            'angka' => $total_tindakan,
+            'keterangan' => 'Tindakan tercatat',
+            'icon' => 'bi-hammer'
+        ]
+    ];
+}
+
 
 $data_tahun = mysqli_fetch_assoc($tahun_aktif);
 $nama_tahun = $data_tahun ? $data_tahun['nama'] : '-';
@@ -259,7 +488,7 @@ $aktivitas = mysqli_query($conn, "
                         </p>
                         <span>
                             <i class="bi bi-person-fill"></i>
-                            <?= htmlspecialchars(ucfirst($_SESSION['user_role'])); ?>
+                            <?= htmlspecialchars($nama_role); ?>
                         </span>
                     </div>
                     <div class="col-md-4 text-end d-none d-md-block">
@@ -268,71 +497,37 @@ $aktivitas = mysqli_query($conn, "
                 </div>
             </div>
 
-            <div class="row g-4 mb-4">
 
-                <div class="col-md-6 col-xl-3">
-                    <div class="card stat-card shadow-sm h-100">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="stat-icon">
-                                <i class="bi bi-people-fill"></i>
-                            </div>
-                            <div>
-                                <div class="stat-title">Total Siswa</div>
-                                <div class="stat-number"><?= $total_siswa; ?></div>
-                                <small class="text-muted">Siswa aktif</small>
-                            </div>
+<div class="row g-4 mb-4">
+
+    <?php foreach ($kartu_statistik as $kartu) { ?>
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="stat-icon">
+                        <i class="bi <?= $kartu['icon']; ?>"></i>
+                    </div>
+
+                    <div>
+                        <div class="stat-title">
+                            <?= htmlspecialchars($kartu['judul']); ?>
                         </div>
+
+                        <div class="stat-number">
+                            <?= htmlspecialchars((string) $kartu['angka']); ?>
+                        </div>
+
+                        <small class="text-muted">
+                            <?= htmlspecialchars($kartu['keterangan']); ?>
+                        </small>
                     </div>
                 </div>
-
-                <div class="col-md-6 col-xl-3">
-                    <div class="card stat-card shadow-sm h-100">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="stat-icon">
-                                <i class="bi bi-person-badge-fill"></i>
-                            </div>
-                            <div>
-                                <div class="stat-title">Total Guru</div>
-                                <div class="stat-number"><?= $total_guru; ?></div>
-                                <small class="text-muted">Guru aktif</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-xl-3">
-                    <div class="card stat-card shadow-sm h-100">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="stat-icon">
-                                <i class="bi bi-exclamation-triangle-fill"></i>
-                            </div>
-                            <div>
-                                <div class="stat-title">Total Pelanggaran</div>
-                                <div class="stat-number"><?= $total_pelanggaran; ?></div>
-                                <small class="text-muted">Data pelanggaran</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-xl-3">
-                    <div class="card stat-card shadow-sm h-100">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="stat-icon">
-                                <i class="bi bi-calendar-event-fill"></i>
-                            </div>
-                            <div>
-                                <div class="stat-title">Tahun Ajaran Aktif</div>
-                                <div class="stat-number" style="font-size:22px;">
-                                    <?= htmlspecialchars($nama_tahun); ?>
-                                </div>
-                                <small class="text-muted">Tahun ajaran</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
+        </div>
+    <?php } ?>
+
+</div>
+
 
             <div class="row g-4 mb-4">
 

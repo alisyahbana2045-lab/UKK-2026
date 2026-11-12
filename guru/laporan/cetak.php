@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/../../config/session.php";
 require_once __DIR__ . "/../../config/koneksi.php";
@@ -11,6 +12,10 @@ $guru_query = mysqli_query($conn, "
     LIMIT 1
 ");
 
+if (!$guru_query) {
+    die("Query guru gagal: " . mysqli_error($conn));
+}
+
 $guru = mysqli_fetch_assoc($guru_query);
 
 if (!$guru) {
@@ -19,24 +24,58 @@ if (!$guru) {
 
 $guru_id = (int) $guru['id'];
 
-$tahun_ajaran_id = isset($_GET['tahun_ajaran_id']) ? (int) $_GET['tahun_ajaran_id'] : 0;
-$kelas_id = isset($_GET['kelas_id']) ? (int) $_GET['kelas_id'] : 0;
+// Ambil data wali kelas aktif
+$wali_query = mysqli_query($conn, "
+    SELECT
+        wk.tahun_ajaran_id,
+        wk.kelas_id,
+        ta.nama AS nama_tahun_ajaran,
+        k.nama AS nama_kelas
+    FROM t_wali_kelas wk
+    INNER JOIN t_tahun_ajaran ta ON wk.tahun_ajaran_id = ta.id
+    INNER JOIN t_kelas k ON wk.kelas_id = k.id
+    WHERE wk.guru_id = $guru_id
+    AND wk.status_aktif = 1
+    LIMIT 1
+");
+
+if (!$wali_query) {
+    die("Query wali kelas gagal: " . mysqli_error($conn));
+}
+
+$wali = mysqli_fetch_assoc($wali_query);
+
+if (!$wali) {
+    die("Data wali kelas aktif tidak ditemukan.");
+}
+
+$wali_tahun_ajaran_id = (int) $wali['tahun_ajaran_id'];
+$wali_kelas_id = (int) $wali['kelas_id'];
+
 $siswa_id = isset($_GET['siswa_id']) ? (int) $_GET['siswa_id'] : 0;
+$tanggal = isset($_GET['tanggal']) ? trim($_GET['tanggal']) : '';
 
-$where = "WHERE ps.guru_id = $guru_id";
-
-if ($tahun_ajaran_id > 0) {
-    $where .= " AND ps.tahun_ajaran_id = $tahun_ajaran_id";
+// Validasi tanggal
+if ($tanggal != '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) {
+    $tanggal = '';
 }
 
-if ($kelas_id > 0) {
-    $where .= " AND ps.kelas_id = $kelas_id";
-}
+// Filter laporan hanya untuk kelas wali
+$where = "
+    WHERE ps.tahun_ajaran_id = $wali_tahun_ajaran_id
+    AND ps.kelas_id = $wali_kelas_id
+";
 
 if ($siswa_id > 0) {
     $where .= " AND ps.siswa_id = $siswa_id";
 }
 
+if ($tanggal != '') {
+    $tanggal_sql = mysqli_real_escape_string($conn, $tanggal);
+    $where .= " AND DATE(ps.tanggal) = '$tanggal_sql'";
+}
+
+// Ambil data laporan
 $query = mysqli_query($conn, "
     SELECT
         ps.*,
@@ -52,7 +91,7 @@ $query = mysqli_query($conn, "
 ");
 
 if (!$query) {
-    die("Query gagal: " . mysqli_error($conn));
+    die("Query laporan gagal: " . mysqli_error($conn));
 }
 
 $total_data = mysqli_num_rows($query);
@@ -63,6 +102,7 @@ $total_poin = 0;
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cetak Laporan Pelanggaran</title>
     <style>
         body {
@@ -160,6 +200,13 @@ $total_poin = 0;
             .no-print {
                 display: none;
             }
+
+            table.laporan th {
+                background-color: #212529 !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
         }
     </style>
 </head>
@@ -183,6 +230,20 @@ $total_poin = 0;
             <td><strong>Nama Guru</strong></td>
             <td>: <?= htmlspecialchars($guru['nama']); ?></td>
         </tr>
+        <tr>
+            <td><strong>Tahun Ajaran</strong></td>
+            <td>: <?= htmlspecialchars($wali['nama_tahun_ajaran']); ?></td>
+        </tr>
+        <tr>
+            <td><strong>Kelas</strong></td>
+            <td>: <?= htmlspecialchars($wali['nama_kelas']); ?></td>
+        </tr>
+        <?php if ($tanggal != '') { ?>
+            <tr>
+                <td><strong>Tanggal Laporan</strong></td>
+                <td>: <?= date('d-m-Y', strtotime($tanggal)); ?></td>
+            </tr>
+        <?php } ?>
         <tr>
             <td><strong>Total Data</strong></td>
             <td>: <?= $total_data; ?> pelanggaran</td>

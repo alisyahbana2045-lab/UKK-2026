@@ -61,6 +61,7 @@ if ($cari !== '') {
     $where = "WHERE
         nama_siswa LIKE '%$cari_esc%'
         OR nama_pelanggaran LIKE '%$cari_esc%'
+        OR nama_guru LIKE '%$cari_esc%'
         OR kelas_tampil LIKE '%$cari_esc%'";
 }
 
@@ -190,7 +191,7 @@ if (!$query) {
                             type="text"
                             name="cari"
                             class="form-control"
-                            placeholder="Cari nama siswa, pelanggaran, atau kelas..."
+                            placeholder="Cari nama siswa, pelanggaran, Guru atau kelas..."
                             value="<?= htmlspecialchars($cari); ?>"
                         >
 

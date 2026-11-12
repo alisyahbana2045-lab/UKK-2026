@@ -1,10 +1,10 @@
 <?php
 require_once __DIR__ . "/../config/session.php";
 require_once __DIR__ . "/../config/koneksi.php";
+require_once __DIR__ . "/../config/akses.php";
 
 $current_page = $_SERVER['REQUEST_URI'];
 
-$is_wali_kelas = false;
 
 if ($_SESSION['user_role'] == 'guru') {
     $user_id = (int) $_SESSION['user_id'];
@@ -18,9 +18,6 @@ if ($_SESSION['user_role'] == 'guru') {
         LIMIT 1
     ");
 
-    if (mysqli_num_rows($query_wali) > 0) {
-        $is_wali_kelas = true;
-    }
 }
 ?>
 

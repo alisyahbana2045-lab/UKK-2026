@@ -1,14 +1,12 @@
-
 <?php
 require_once __DIR__ . "/../../config/admin.php";
 require_once __DIR__ . "/../../config/koneksi.php";
 
-// Ambil filter
 $tahun_ajaran_id = isset($_GET['tahun_ajaran_id']) ? (int) $_GET['tahun_ajaran_id'] : 0;
 $kelas_id = isset($_GET['kelas_id']) ? (int) $_GET['kelas_id'] : 0;
 $siswa_id = isset($_GET['siswa_id']) ? (int) $_GET['siswa_id'] : 0;
+$tanggal = isset($_GET['tanggal']) ? trim($_GET['tanggal']) : '';
 
-// Kondisi filter
 $where = "WHERE 1=1";
 
 if ($tahun_ajaran_id > 0) {
@@ -23,7 +21,11 @@ if ($siswa_id > 0) {
     $where .= " AND ps.siswa_id = $siswa_id";
 }
 
-// Ambil data laporan
+if ($tanggal != '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) {
+    $tanggal_sql = mysqli_real_escape_string($conn, $tanggal);
+    $where .= " AND ps.tanggal = '$tanggal_sql'";
+}
+
 $query = mysqli_query($conn, "
     SELECT
         ps.*,
@@ -44,7 +46,6 @@ if (!$query) {
     die("Query gagal: " . mysqli_error($conn));
 }
 
-// Nama file Excel
 $filename = "Laporan_Pelanggaran_" . date('Ymd_His') . ".xls";
 
 header("Content-Type: application/vnd.ms-excel; charset=utf-8");
@@ -69,7 +70,6 @@ header("Expires: 0");
         <th>Tindakan</th>
         <th>Guru</th>
     </tr>
-
     <?php $no = 1; ?>
     <?php while ($data = mysqli_fetch_assoc($query)) { ?>
         <tr>
