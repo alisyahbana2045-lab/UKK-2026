@@ -3,6 +3,27 @@ require_once "config/session.php";
 require_once "config/koneksi.php";
 require_once "config/akses.php";
 
+// Mengambil ID guru berdasarkan akun yang sedang login
+if ($user_role != 'admin' && !$is_wali_kelas) {
+
+    $user_id = (int) $_SESSION['user_id'];
+
+    $query_id_guru = mysqli_query($conn, "
+        SELECT id
+        FROM t_guru
+        WHERE user_id = '$user_id'
+        AND status_aktif = 1
+        LIMIT 1
+    ");
+
+    if ($query_id_guru && mysqli_num_rows($query_id_guru) > 0) {
+        $data_id_guru = mysqli_fetch_assoc($query_id_guru);
+        $guru_id = (int) $data_id_guru['id'];
+    } else {
+        $guru_id = 0;
+    }
+}
+
 $nama_role = 'Guru';
 
 if ($user_role == 'admin') {
@@ -117,50 +138,7 @@ if (!$tahun_aktif) {
     die("Error tahun ajaran: " . mysqli_error($conn));
 }
 
-$data_tahun = mysqli_fetch_assoc($tahun_aktif);
 
-$nama_tahun = $data_tahun['nama'] ?? '-';
-
-// Grafik pelanggaran 7 hari terakhir
-$chart_labels = [];
-$chart_data = [];
-
-for ($i = 6; $i >= 0; $i--) {
-
-    $tanggal = date('Y-m-d', strtotime("-$i days"));
-
-    $chart_labels[] = date('d M', strtotime($tanggal));
-
-    $query_chart = mysqli_query($conn, "
-        SELECT COUNT(*) AS total
-        FROM t_pelanggaran_siswa
-        WHERE tanggal = '$tanggal'
-        AND $filter_pelanggaran
-    ");
-
-    $data_chart = mysqli_fetch_assoc($query_chart);
-
-    $chart_data[] = (int) ($data_chart['total'] ?? 0);
-}
-
-// Pelanggaran terbanyak
-$pelanggaran_terbanyak = mysqli_query($conn, "
-    SELECT nama_pelanggaran, COUNT(*) AS jumlah
-    FROM t_pelanggaran_siswa
-    WHERE $filter_pelanggaran
-    GROUP BY nama_pelanggaran
-    ORDER BY jumlah DESC
-    LIMIT 5
-");
-
-// Aktivitas terbaru
-$aktivitas = mysqli_query($conn, "
-    SELECT nama_siswa, nama_pelanggaran, tanggal, nama_guru
-    FROM t_pelanggaran_siswa
-    WHERE $filter_pelanggaran
-    ORDER BY id DESC
-    LIMIT 5
-");
 
 // Pengaturan kartu statistik berdasarkan role
 if ($user_role == 'admin') {
