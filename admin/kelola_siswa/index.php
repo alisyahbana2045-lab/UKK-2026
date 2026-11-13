@@ -31,6 +31,8 @@ $query = mysqli_query($conn, "SELECT * FROM t_siswa
     ORDER BY id DESC
     LIMIT $offset, $per_page");
 
+
+
 if (!$query) {
     die("Query gagal: " . mysqli_error($conn));
 }

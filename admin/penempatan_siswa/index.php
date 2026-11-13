@@ -78,6 +78,7 @@ $query = mysqli_query($conn, "
     LIMIT $offset, $per_page
 ");
 
+
 if (!$query) {
     die("Query gagal: " . mysqli_error($conn));
 }
@@ -215,7 +216,7 @@ if (!$query) {
 
                                 if (mysqli_num_rows($query) > 0) {
 
-                                    while ($data = mysqli_fetch_assoc($query)) {
+                                    while ($siswa = mysqli_fetch_assoc($query)) {
 
                                 ?>
 
@@ -224,45 +225,39 @@ if (!$query) {
                                         <td><?= $no++; ?></td>
 
                                         <td>
-                                            <?= htmlspecialchars($data['nis']); ?>
+                                            <?= htmlspecialchars($siswa['nis']); ?>
                                         </td>
 
                                         <td>
-                                            <?= htmlspecialchars($data['nama_siswa']); ?>
+                                            <?= htmlspecialchars($siswa['nama_siswa']); ?>
                                         </td>
 
                                         <td>
-                                            <?= htmlspecialchars($data['tahun_ajaran']); ?>
+                                            <?= htmlspecialchars($siswa['tahun_ajaran']); ?>
                                         </td>
 
                                         <td>
-                                            <?= htmlspecialchars($data['nama_kelas']); ?>
+                                            <?= htmlspecialchars($siswa['nama_kelas']); ?>
                                         </td>
 
                                         <td>
-                                            <?= htmlspecialchars($data['tanggal_mulai']); ?>
+                                            <?= htmlspecialchars($siswa['tanggal_mulai']); ?>
                                         </td>
 
                                         <td>
-                                            <?= htmlspecialchars($data['tanggal_selesai']); ?>
+                                            <?= htmlspecialchars($siswa['tanggal_selesai']); ?>
                                         </td>
 
                                         <td>
-
-                                            <?php if ($data['status_aktif'] == 1) { ?>
-
+                                            <?php if ($siswa['status_aktif'] == 1) { ?>
                                                 <span class="badge bg-success">
                                                     Aktif
                                                 </span>
-
                                             <?php } else { ?>
-
                                                 <span class="badge bg-danger">
                                                     Tidak Aktif
                                                 </span>
-
                                             <?php } ?>
-
                                         </td>
 
                                     </tr>

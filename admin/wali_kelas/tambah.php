@@ -37,6 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (mysqli_num_rows($cek) > 0) {
         die("Kelas tersebut sudah memiliki wali kelas aktif pada tahun ajaran yang dipilih.");
     }
+    
+
+
+
 
     $query = mysqli_query($conn, "
         INSERT INTO t_wali_kelas
