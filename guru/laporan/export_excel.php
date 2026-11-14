@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/../../config/session.php";
 require_once __DIR__ . "/../../config/koneksi.php";
@@ -47,7 +48,36 @@ $wali_tahun_ajaran_id = (int) $wali['tahun_ajaran_id'];
 $wali_kelas_id = (int) $wali['kelas_id'];
 
 $siswa_id = isset($_GET['siswa_id']) ? (int) $_GET['siswa_id'] : 0;
-$tanggal = isset($_GET['tanggal']) ? trim($_GET['tanggal']) : '';
+$tanggal_mulai = isset($_GET['tanggal_mulai']) ? trim($_GET['tanggal_mulai']) : '';
+$tanggal_sampai = isset($_GET['tanggal_sampai']) ? trim($_GET['tanggal_sampai']) : '';
+
+// Validasi tanggal mulai
+if ($tanggal_mulai !== '') {
+    $date_mulai = DateTime::createFromFormat('!Y-m-d', $tanggal_mulai);
+
+    if (!$date_mulai || $date_mulai->format('Y-m-d') !== $tanggal_mulai) {
+        $tanggal_mulai = '';
+    }
+}
+
+// Validasi tanggal sampai
+if ($tanggal_sampai !== '') {
+    $date_sampai = DateTime::createFromFormat('!Y-m-d', $tanggal_sampai);
+
+    if (!$date_sampai || $date_sampai->format('Y-m-d') !== $tanggal_sampai) {
+        $tanggal_sampai = '';
+    }
+}
+
+// Pastikan tanggal mulai tidak melebihi tanggal sampai
+if (
+    $tanggal_mulai !== '' &&
+    $tanggal_sampai !== '' &&
+    $tanggal_mulai > $tanggal_sampai
+) {
+    $tanggal_mulai = '';
+    $tanggal_sampai = '';
+}
 
 // Filter wajib sesuai kelas wali
 $where = "
@@ -59,14 +89,16 @@ if ($siswa_id > 0) {
     $where .= " AND ps.siswa_id = $siswa_id";
 }
 
-// Filter berdasarkan satu tanggal
-if ($tanggal !== '') {
-    $tanggal_valid = DateTime::createFromFormat('Y-m-d', $tanggal);
+// Filter tanggal mulai
+if ($tanggal_mulai !== '') {
+    $tanggal_mulai_sql = mysqli_real_escape_string($conn, $tanggal_mulai);
+    $where .= " AND ps.tanggal >= '$tanggal_mulai_sql'";
+}
 
-    if ($tanggal_valid && $tanggal_valid->format('Y-m-d') === $tanggal) {
-        $tanggal_sql = mysqli_real_escape_string($conn, $tanggal);
-        $where .= " AND ps.tanggal = '$tanggal_sql'";
-    }
+// Filter tanggal sampai
+if ($tanggal_sampai !== '') {
+    $tanggal_sampai_sql = mysqli_real_escape_string($conn, $tanggal_sampai);
+    $where .= " AND ps.tanggal < DATE_ADD('$tanggal_sampai_sql', INTERVAL 1 DAY)";
 }
 
 // Ambil data laporan
@@ -99,22 +131,41 @@ header("Pragma: no-cache");
 header("Expires: 0");
 ?>
 
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
 <table border="1">
     <tr>
         <th colspan="10">LAPORAN PELANGGARAN SISWA</th>
     </tr>
+
     <tr>
         <th colspan="10">
             Guru: <?= htmlspecialchars($guru['nama']); ?>
         </th>
     </tr>
-    <?php if ($tanggal !== '') { ?>
+
+    <?php if ($tanggal_mulai !== '' || $tanggal_sampai !== '') { ?>
         <tr>
             <th colspan="10">
-                Tanggal: <?= htmlspecialchars(date('d-m-Y', strtotime($tanggal))); ?>
+                Rentang Tanggal:
+                <?= $tanggal_mulai !== '' ? date('d-m-Y', strtotime($tanggal_mulai)) : 'Semua'; ?>
+                s/d
+                <?= $tanggal_sampai !== '' ? date('d-m-Y', strtotime($tanggal_sampai)) : 'Semua'; ?>
             </th>
         </tr>
     <?php } ?>
+
+    <?php if ($siswa_id > 0) { ?>
+        <tr>
+            <th colspan="10">Filter Siswa: Siswa Terpilih</th>
+        </tr>
+    <?php } ?>
+
     <tr>
         <th>No</th>
         <th>Tanggal</th>
@@ -128,20 +179,44 @@ header("Expires: 0");
         <th>Guru Pelapor</th>
     </tr>
 
-    <?php $no = 1; ?>
+    <?php
+    $no = 1;
+    $total_poin = 0;
+    ?>
 
-    <?php while ($data = mysqli_fetch_assoc($query)) { ?>
+    <?php if (mysqli_num_rows($query) > 0) { ?>
+
+        <?php while ($data = mysqli_fetch_assoc($query)) { ?>
+            <?php $total_poin += (int) $data['poin']; ?>
+
+            <tr>
+                <td><?= $no++; ?></td>
+                <td><?= date('d-m-Y', strtotime($data['tanggal'])); ?></td>
+                <td><?= htmlspecialchars($data['nama_tahun_ajaran'] ?? '-'); ?></td>
+                <td><?= htmlspecialchars($data['nama_kelas'] ?? '-'); ?></td>
+                <td><?= htmlspecialchars($data['nama_siswa'] ?? '-'); ?></td>
+                <td><?= htmlspecialchars($data['nama_pelanggaran'] ?? '-'); ?></td>
+                <td><?= (int) $data['poin']; ?></td>
+                <td><?= htmlspecialchars($data['keterangan'] ?: '-'); ?></td>
+                <td><?= htmlspecialchars($data['tindakan'] ?: '-'); ?></td>
+                <td><?= htmlspecialchars($data['nama_guru'] ?? '-'); ?></td>
+            </tr>
+        <?php } ?>
+
+    <?php } else { ?>
+
         <tr>
-            <td><?= $no++; ?></td>
-            <td><?= date('d-m-Y', strtotime($data['tanggal'])); ?></td>
-            <td><?= htmlspecialchars($data['nama_tahun_ajaran'] ?? '-'); ?></td>
-            <td><?= htmlspecialchars($data['nama_kelas'] ?? '-'); ?></td>
-            <td><?= htmlspecialchars($data['nama_siswa'] ?? '-'); ?></td>
-            <td><?= htmlspecialchars($data['nama_pelanggaran'] ?? '-'); ?></td>
-            <td><?= (int) $data['poin']; ?></td>
-            <td><?= htmlspecialchars($data['keterangan'] ?: '-'); ?></td>
-            <td><?= htmlspecialchars($data['tindakan'] ?: '-'); ?></td>
-            <td><?= htmlspecialchars($data['nama_guru'] ?? '-'); ?></td>
+            <td colspan="10">Tidak ada data pelanggaran.</td>
         </tr>
+
     <?php } ?>
+
+    <tr>
+        <th colspan="6">TOTAL POIN</th>
+        <th><?= $total_poin; ?></th>
+        <th colspan="3"></th>
+    </tr>
 </table>
+
+</body>
+</html>

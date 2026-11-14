@@ -207,6 +207,14 @@ if (!$query_rekap) {
             border-radius: 12px;
         }
 
+        .badge-status {
+            min-width: 100px;
+            padding: 7px 12px;
+            font-size: 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
         @media (max-width: 767.98px) {
             .main-content {
                 margin-left: 0;
@@ -319,6 +327,17 @@ if (!$query_rekap) {
                 <?php } ?>
             </div>
 
+            <!-- KETERANGAN STATUS -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Keterangan Status Poin</h6>
+
+                    <span class="badge bg-success me-2 mb-1">Aman: 0–19</span>
+                    <span class="badge bg-warning text-dark me-2 mb-1">Peringatan: 20–49</span>
+                    <span class="badge bg-danger mb-1">Danger: 50+</span>
+                </div>
+            </div>
+
             <!-- TABEL REKAP -->
             <div class="card shadow-sm">
                 <div class="card-body">
@@ -335,6 +354,7 @@ if (!$query_rekap) {
                                     <th>Kelas</th>
                                     <th>Jumlah Pelanggaran</th>
                                     <th>Total Poin</th>
+                                    <th>Status</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -345,6 +365,19 @@ if (!$query_rekap) {
 
                                 if (mysqli_num_rows($query_rekap) > 0) {
                                     while ($row = mysqli_fetch_assoc($query_rekap)) {
+
+                                        $poin = (int) $row['total_poin'];
+
+                                        if ($poin < 20) {
+                                            $status = "Aman";
+                                            $warna = "bg-success";
+                                        } elseif ($poin < 50) {
+                                            $status = "Peringatan";
+                                            $warna = "bg-warning text-dark";
+                                        } else {
+                                            $status = "Danger";
+                                            $warna = "bg-danger";
+                                        }
                                 ?>
                                     <tr>
                                         <td><?= $no++; ?></td>
@@ -352,16 +385,36 @@ if (!$query_rekap) {
                                         <td><?= htmlspecialchars($row['nama']); ?></td>
                                         <td><?= htmlspecialchars($row['nama_kelas']); ?></td>
                                         <td><?= $row['jumlah_pelanggaran']; ?></td>
+
                                         <td>
                                             <span class="badge text-bg-danger">
-                                                <?= $row['total_poin']; ?> poin
+                                                <?= $poin; ?> poin
                                             </span>
                                         </td>
+
                                         <td>
-                                            <a href="detail.php?id=<?= $row['id']; ?>&tahun_ajaran_id=<?= $tahun_ajaran_id; ?>"
-                                               class="btn btn-sm btn-info text-white">
-                                                <i class="bi bi-eye"></i> Detail
-                                            </a>
+                                            <span class="badge badge-status <?= $warna; ?>">
+                                                <?= $status; ?>
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <div class="d-flex flex-wrap gap-1">
+
+                                                <a href="detail.php?id=<?= $row['id']; ?>&tahun_ajaran_id=<?= $tahun_ajaran_id; ?>"
+                                                   class="btn btn-sm btn-info text-white">
+                                                    <i class="bi bi-eye"></i> Detail
+                                                </a>
+
+                                                <?php if ($poin >= 50) { ?>
+                                                    <a href="surat_pemanggilan.php?id=<?= $row['id']; ?>&tahun_ajaran_id=<?= $tahun_ajaran_id; ?>"
+                                                       class="btn btn-sm btn-danger">
+                                                        <i class="bi bi-envelope"></i>
+                                                        Surat Pemanggilan
+                                                    </a>
+                                                <?php } ?>
+
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php
@@ -369,7 +422,7 @@ if (!$query_rekap) {
                                 } else {
                                 ?>
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted">
+                                        <td colspan="8" class="text-center text-muted">
                                             Belum ada data siswa pada kelas ini.
                                         </td>
                                     </tr>

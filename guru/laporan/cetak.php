@@ -53,11 +53,35 @@ $wali_tahun_ajaran_id = (int) $wali['tahun_ajaran_id'];
 $wali_kelas_id = (int) $wali['kelas_id'];
 
 $siswa_id = isset($_GET['siswa_id']) ? (int) $_GET['siswa_id'] : 0;
-$tanggal = isset($_GET['tanggal']) ? trim($_GET['tanggal']) : '';
+$tanggal_mulai = isset($_GET['tanggal_mulai']) ? trim($_GET['tanggal_mulai']) : '';
+$tanggal_sampai = isset($_GET['tanggal_sampai']) ? trim($_GET['tanggal_sampai']) : '';
 
-// Validasi tanggal
-if ($tanggal != '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) {
-    $tanggal = '';
+// Validasi tanggal mulai
+if ($tanggal_mulai != '') {
+    $date_mulai = DateTime::createFromFormat('!Y-m-d', $tanggal_mulai);
+
+    if (!$date_mulai || $date_mulai->format('Y-m-d') !== $tanggal_mulai) {
+        $tanggal_mulai = '';
+    }
+}
+
+// Validasi tanggal sampai
+if ($tanggal_sampai != '') {
+    $date_sampai = DateTime::createFromFormat('!Y-m-d', $tanggal_sampai);
+
+    if (!$date_sampai || $date_sampai->format('Y-m-d') !== $tanggal_sampai) {
+        $tanggal_sampai = '';
+    }
+}
+
+// Pastikan tanggal mulai tidak lebih besar dari tanggal sampai
+if (
+    $tanggal_mulai != '' &&
+    $tanggal_sampai != '' &&
+    $tanggal_mulai > $tanggal_sampai
+) {
+    $tanggal_mulai = '';
+    $tanggal_sampai = '';
 }
 
 // Filter laporan hanya untuk kelas wali
@@ -70,9 +94,14 @@ if ($siswa_id > 0) {
     $where .= " AND ps.siswa_id = $siswa_id";
 }
 
-if ($tanggal != '') {
-    $tanggal_sql = mysqli_real_escape_string($conn, $tanggal);
-    $where .= " AND DATE(ps.tanggal) = '$tanggal_sql'";
+if ($tanggal_mulai != '') {
+    $tanggal_mulai_sql = mysqli_real_escape_string($conn, $tanggal_mulai);
+    $where .= " AND ps.tanggal >= '$tanggal_mulai_sql'";
+}
+
+if ($tanggal_sampai != '') {
+    $tanggal_sampai_sql = mysqli_real_escape_string($conn, $tanggal_sampai);
+    $where .= " AND ps.tanggal < DATE_ADD('$tanggal_sampai_sql', INTERVAL 1 DAY)";
 }
 
 // Ambil data laporan
@@ -104,6 +133,7 @@ $total_poin = 0;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cetak Laporan Pelanggaran</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -210,6 +240,7 @@ $total_poin = 0;
         }
     </style>
 </head>
+
 <body>
 
 <div class="no-print" style="margin-bottom: 20px;">
@@ -230,20 +261,35 @@ $total_poin = 0;
             <td><strong>Nama Guru</strong></td>
             <td>: <?= htmlspecialchars($guru['nama']); ?></td>
         </tr>
+
         <tr>
             <td><strong>Tahun Ajaran</strong></td>
             <td>: <?= htmlspecialchars($wali['nama_tahun_ajaran']); ?></td>
         </tr>
+
         <tr>
             <td><strong>Kelas</strong></td>
             <td>: <?= htmlspecialchars($wali['nama_kelas']); ?></td>
         </tr>
-        <?php if ($tanggal != '') { ?>
+
+        <?php if ($tanggal_mulai != '' || $tanggal_sampai != '') { ?>
             <tr>
-                <td><strong>Tanggal Laporan</strong></td>
-                <td>: <?= date('d-m-Y', strtotime($tanggal)); ?></td>
+                <td><strong>Rentang Tanggal</strong></td>
+                <td>:
+                    <?= $tanggal_mulai != '' ? date('d-m-Y', strtotime($tanggal_mulai)) : 'Semua'; ?>
+                    s/d
+                    <?= $tanggal_sampai != '' ? date('d-m-Y', strtotime($tanggal_sampai)) : 'Semua'; ?>
+                </td>
             </tr>
         <?php } ?>
+
+        <?php if ($siswa_id > 0) { ?>
+            <tr>
+                <td><strong>Filter Siswa</strong></td>
+                <td>: Siswa terpilih</td>
+            </tr>
+        <?php } ?>
+
         <tr>
             <td><strong>Total Data</strong></td>
             <td>: <?= $total_data; ?> pelanggaran</td>
@@ -264,11 +310,14 @@ $total_poin = 0;
             <th>Tindakan</th>
         </tr>
     </thead>
+
     <tbody>
         <?php if ($total_data > 0) { ?>
             <?php $no = 1; ?>
+
             <?php while ($data = mysqli_fetch_assoc($query)) { ?>
                 <?php $total_poin += (int) $data['poin']; ?>
+
                 <tr>
                     <td style="text-align:center;"><?= $no++; ?></td>
                     <td><?= date('d-m-Y', strtotime($data['tanggal'])); ?></td>
@@ -280,6 +329,7 @@ $total_poin = 0;
                     <td><?= htmlspecialchars($data['tindakan'] ?: '-'); ?></td>
                 </tr>
             <?php } ?>
+
         <?php } else { ?>
             <tr>
                 <td colspan="8" style="text-align:center;">

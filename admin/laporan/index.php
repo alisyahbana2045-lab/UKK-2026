@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/../../config/admin.php";
 require_once __DIR__ . "/../../config/koneksi.php";
@@ -5,7 +6,9 @@ require_once __DIR__ . "/../../config/koneksi.php";
 $tahun_ajaran_id = isset($_GET['tahun_ajaran_id']) ? (int) $_GET['tahun_ajaran_id'] : 0;
 $kelas_id = isset($_GET['kelas_id']) ? (int) $_GET['kelas_id'] : 0;
 $siswa_id = isset($_GET['siswa_id']) ? (int) $_GET['siswa_id'] : 0;
-$tanggal = isset($_GET['tanggal']) ? trim($_GET['tanggal']) : '';
+
+$tanggal_mulai = isset($_GET['tanggal_mulai']) ? trim($_GET['tanggal_mulai']) : '';
+$tanggal_selesai = isset($_GET['tanggal_selesai']) ? trim($_GET['tanggal_selesai']) : '';
 
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 
@@ -13,15 +16,26 @@ if ($page < 1) {
     $page = 1;
 }
 
+// Validasi tanggal
+if ($tanggal_mulai != '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal_mulai)) {
+    $tanggal_mulai = '';
+}
+
+if ($tanggal_selesai != '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal_selesai)) {
+    $tanggal_selesai = '';
+}
+
+if (
+    $tanggal_mulai != '' &&
+    $tanggal_selesai != '' &&
+    $tanggal_mulai > $tanggal_selesai
+) {
+    $tanggal_mulai = '';
+    $tanggal_selesai = '';
+}
+
 $per_page = 10;
 $offset = ($page - 1) * $per_page;
-
-// Validasi tanggal
-$tanggal = isset($_GET['tanggal']) ? trim($_GET['tanggal']) : '';
-
-if ($tanggal != '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) {
-    $tanggal = '';
-}
 
 // Proses hapus laporan
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hapus_id'])) {
@@ -45,7 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hapus_id'])) {
             'tahun_ajaran_id' => $tahun_ajaran_id,
             'kelas_id' => $kelas_id,
             'siswa_id' => $siswa_id,
-            'tanggal' => $tanggal,
+            'tanggal_mulai' => $tanggal_mulai,
+            'tanggal_selesai' => $tanggal_selesai,
             'page' => $page,
             'hapus' => 'berhasil'
         ]);
@@ -72,9 +87,14 @@ if ($siswa_id > 0) {
     $where .= " AND ps.siswa_id = $siswa_id";
 }
 
-if ($tanggal != '') {
-    $tanggal_sql = mysqli_real_escape_string($conn, $tanggal);
-    $where .= " AND DATE(ps.tanggal) = '$tanggal_sql'";
+if ($tanggal_mulai != '') {
+    $mulai_sql = mysqli_real_escape_string($conn, $tanggal_mulai);
+    $where .= " AND DATE(ps.tanggal) >= '$mulai_sql'";
+}
+
+if ($tanggal_selesai != '') {
+    $selesai_sql = mysqli_real_escape_string($conn, $tanggal_selesai);
+    $where .= " AND DATE(ps.tanggal) <= '$selesai_sql'";
 }
 
 // Data dropdown
@@ -166,6 +186,7 @@ if (!$query) {
         body {
             background-color: #f1f3f5;
         }
+
         .sidebar {
             position: fixed;
             top: 0;
@@ -174,24 +195,29 @@ if (!$query) {
             overflow-y: auto;
             z-index: 1000;
         }
+
         .main-content {
             margin-left: 16.666667%;
             padding: 30px;
         }
+
         .menu-sidebar {
             color: white;
             background-color: transparent;
             transition: 0.3s;
         }
+
         .menu-sidebar:hover,
         .menu-sidebar.active {
             color: white;
             background-color: #0d6efd;
         }
+
         .stat-card {
             border: none;
             border-radius: 12px;
         }
+
         .stat-icon {
             width: 50px;
             height: 50px;
@@ -203,11 +229,13 @@ if (!$query) {
             color: white;
             font-size: 22px;
         }
+
         .table th {
             background-color: #212529;
             color: white;
             white-space: nowrap;
         }
+
         @media (max-width: 991.98px) {
             .main-content {
                 margin-left: 25%;
@@ -233,6 +261,16 @@ if (!$query) {
                     <i class="bi bi-check-circle-fill"></i>
                     Data laporan berhasil dihapus.
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php } ?>
+
+            <?php if (
+                $tanggal_mulai != '' &&
+                $tanggal_selesai != '' &&
+                $tanggal_mulai > $tanggal_selesai
+            ) { ?>
+                <div class="alert alert-warning">
+                    Tanggal mulai tidak boleh melebihi tanggal selesai.
                 </div>
             <?php } ?>
 
@@ -306,14 +344,22 @@ if (!$query) {
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label">Tanggal</label>
-                            <input type="date" name="tanggal" class="form-control" value="<?= htmlspecialchars($tanggal); ?>">
+                            <label class="form-label">Tanggal Mulai</label>
+                            <input type="date" name="tanggal_mulai" class="form-control"
+                                value="<?= htmlspecialchars($tanggal_mulai); ?>">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Tanggal Selesai</label>
+                            <input type="date" name="tanggal_selesai" class="form-control"
+                                value="<?= htmlspecialchars($tanggal_selesai); ?>">
                         </div>
 
                         <div class="col-12 d-flex align-items-end gap-2">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-search"></i> Cari
                             </button>
+
                             <a href="index.php" class="btn btn-secondary">
                                 <i class="bi bi-arrow-clockwise"></i> Reset
                             </a>
@@ -324,7 +370,7 @@ if (!$query) {
 
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                         <div>
                             <h5 class="fw-bold mb-1">
                                 <i class="bi bi-file-earmark-text"></i>
@@ -340,7 +386,8 @@ if (!$query) {
                                 'tahun_ajaran_id' => $tahun_ajaran_id,
                                 'kelas_id' => $kelas_id,
                                 'siswa_id' => $siswa_id,
-                                'tanggal' => $tanggal
+                                'tanggal_mulai' => $tanggal_mulai,
+                                'tanggal_selesai' => $tanggal_selesai
                             ]); ?>" class="btn btn-success">
                                 <i class="bi bi-file-earmark-excel"></i> Export Excel
                             </a>
@@ -349,7 +396,8 @@ if (!$query) {
                                 'tahun_ajaran_id' => $tahun_ajaran_id,
                                 'kelas_id' => $kelas_id,
                                 'siswa_id' => $siswa_id,
-                                'tanggal' => $tanggal
+                                'tanggal_mulai' => $tanggal_mulai,
+                                'tanggal_selesai' => $tanggal_selesai
                             ]); ?>" target="_blank" class="btn btn-dark">
                                 <i class="bi bi-printer"></i> Cetak
                             </a>
@@ -374,13 +422,14 @@ if (!$query) {
                             <tbody>
                                 <?php if (mysqli_num_rows($query) > 0) { ?>
                                     <?php $no = $offset + 1; ?>
+
                                     <?php while ($data = mysqli_fetch_assoc($query)) { ?>
                                         <tr>
                                             <td><?= $no++; ?></td>
                                             <td><?= date('d-m-Y', strtotime($data['tanggal'])); ?></td>
-                                            <td><?= htmlspecialchars($data['nama_siswa']); ?></td>
-                                            <td><?= htmlspecialchars($data['nama_kelas']); ?></td>
-                                            <td><?= htmlspecialchars($data['nama_pelanggaran']); ?></td>
+                                            <td><?= htmlspecialchars($data['nama_siswa'] ?? '-'); ?></td>
+                                            <td><?= htmlspecialchars($data['nama_kelas'] ?? '-'); ?></td>
+                                            <td><?= htmlspecialchars($data['nama_pelanggaran'] ?? '-'); ?></td>
                                             <td>
                                                 <span class="badge bg-danger">
                                                     <?= (int) $data['poin']; ?>
@@ -398,6 +447,7 @@ if (!$query) {
                                             </td>
                                         </tr>
                                     <?php } ?>
+
                                 <?php } else { ?>
                                     <tr>
                                         <td colspan="9" class="text-center py-4 text-muted">
@@ -419,7 +469,8 @@ if (!$query) {
                                             'tahun_ajaran_id' => $tahun_ajaran_id,
                                             'kelas_id' => $kelas_id,
                                             'siswa_id' => $siswa_id,
-                                            'tanggal' => $tanggal,
+                                            'tanggal_mulai' => $tanggal_mulai,
+                                            'tanggal_selesai' => $tanggal_selesai,
                                             'page' => $page - 1
                                         ]); ?>">
                                             Sebelumnya
@@ -432,7 +483,8 @@ if (!$query) {
                                                 'tahun_ajaran_id' => $tahun_ajaran_id,
                                                 'kelas_id' => $kelas_id,
                                                 'siswa_id' => $siswa_id,
-                                                'tanggal' => $tanggal,
+                                                'tanggal_mulai' => $tanggal_mulai,
+                                                'tanggal_selesai' => $tanggal_selesai,
                                                 'page' => $i
                                             ]); ?>">
                                                 <?= $i; ?>
@@ -445,7 +497,8 @@ if (!$query) {
                                             'tahun_ajaran_id' => $tahun_ajaran_id,
                                             'kelas_id' => $kelas_id,
                                             'siswa_id' => $siswa_id,
-                                            'tanggal' => $tanggal,
+                                            'tanggal_mulai' => $tanggal_mulai,
+                                            'tanggal_selesai' => $tanggal_selesai,
                                             'page' => $page + 1
                                         ]); ?>">
                                             Berikutnya

@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/../../config/admin.php";
 require_once __DIR__ . "/../../config/koneksi.php";
@@ -9,17 +10,23 @@ if ($id <= 0) {
     die("ID siswa tidak valid.");
 }
 
+// NONAKTIFKAN SISWA
 if ($aksi == 'nonaktif') {
-    $query = mysqli_query($conn, "UPDATE t_siswa SET status_aktif = 0 WHERE id = $id");
+    $query = mysqli_query($conn, "
+        UPDATE t_siswa
+        SET status_aktif = 0
+        WHERE id = $id
+    ");
 
     if (!$query) {
-        die("Data siswa gagal dinonaktifkan: " . mysqli_error($conn));
+        die("Siswa gagal dinonaktifkan: " . mysqli_error($conn));
     }
 
     header("Location: index.php");
     exit;
 }
 
+// HAPUS PERMANEN SISWA
 if ($aksi == 'hapus') {
     mysqli_begin_transaction($conn);
 

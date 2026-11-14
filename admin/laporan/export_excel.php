@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/../../config/admin.php";
 require_once __DIR__ . "/../../config/koneksi.php";
@@ -5,8 +6,28 @@ require_once __DIR__ . "/../../config/koneksi.php";
 $tahun_ajaran_id = isset($_GET['tahun_ajaran_id']) ? (int) $_GET['tahun_ajaran_id'] : 0;
 $kelas_id = isset($_GET['kelas_id']) ? (int) $_GET['kelas_id'] : 0;
 $siswa_id = isset($_GET['siswa_id']) ? (int) $_GET['siswa_id'] : 0;
-$tanggal = isset($_GET['tanggal']) ? trim($_GET['tanggal']) : '';
 
+$tanggal_mulai = isset($_GET['tanggal_mulai']) ? trim($_GET['tanggal_mulai']) : '';
+$tanggal_selesai = isset($_GET['tanggal_selesai']) ? trim($_GET['tanggal_selesai']) : '';
+
+// Validasi tanggal
+if ($tanggal_mulai != '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal_mulai)) {
+    $tanggal_mulai = '';
+}
+
+if ($tanggal_selesai != '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal_selesai)) {
+    $tanggal_selesai = '';
+}
+
+if (
+    $tanggal_mulai != '' &&
+    $tanggal_selesai != '' &&
+    $tanggal_mulai > $tanggal_selesai
+) {
+    die("Tanggal mulai tidak boleh melebihi tanggal selesai.");
+}
+
+// Filter laporan
 $where = "WHERE 1=1";
 
 if ($tahun_ajaran_id > 0) {
@@ -21,11 +42,17 @@ if ($siswa_id > 0) {
     $where .= " AND ps.siswa_id = $siswa_id";
 }
 
-if ($tanggal != '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) {
-    $tanggal_sql = mysqli_real_escape_string($conn, $tanggal);
-    $where .= " AND ps.tanggal = '$tanggal_sql'";
+if ($tanggal_mulai != '') {
+    $mulai_sql = mysqli_real_escape_string($conn, $tanggal_mulai);
+    $where .= " AND DATE(ps.tanggal) >= '$mulai_sql'";
 }
 
+if ($tanggal_selesai != '') {
+    $selesai_sql = mysqli_real_escape_string($conn, $tanggal_selesai);
+    $where .= " AND DATE(ps.tanggal) <= '$selesai_sql'";
+}
+
+// Ambil data laporan
 $query = mysqli_query($conn, "
     SELECT
         ps.*,
@@ -58,6 +85,7 @@ header("Expires: 0");
     <tr>
         <th colspan="10">LAPORAN PELANGGARAN SISWA</th>
     </tr>
+
     <tr>
         <th>No</th>
         <th>Tanggal</th>
@@ -70,7 +98,9 @@ header("Expires: 0");
         <th>Tindakan</th>
         <th>Guru</th>
     </tr>
+
     <?php $no = 1; ?>
+
     <?php while ($data = mysqli_fetch_assoc($query)) { ?>
         <tr>
             <td><?= $no++; ?></td>

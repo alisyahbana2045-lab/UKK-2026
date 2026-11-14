@@ -138,6 +138,8 @@ if (!$tahun_aktif) {
     die("Error tahun ajaran: " . mysqli_error($conn));
 }
 
+$data_tahun = mysqli_fetch_assoc($tahun_aktif);
+$nama_tahun = $data_tahun['nama'] ?? '-';
 
 
 // Pengaturan kartu statistik berdasarkan role

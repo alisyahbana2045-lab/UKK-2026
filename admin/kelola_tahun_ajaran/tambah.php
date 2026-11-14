@@ -15,7 +15,7 @@ if (isset($_POST['simpan'])) {
         $error = "Tanggal selesai tidak boleh lebih awal dari tanggal mulai.";
     } elseif (mysqli_num_rows($cek_duplikasi) > 0) {
         // 2. Jika sudah ada, tampilkan pesan error
-        $error = "Gagal! Tahun ajaran '$nama' sudah terdaftar di database.";
+        $error = "Gagal! Tahun ajaran $nama sudah terdaftar.";
     } else {
         // 3. Jika aman, jalankan insert
         $query = mysqli_query($conn, "INSERT INTO t_tahun_ajaran

@@ -55,8 +55,10 @@ $wali_kelas_id = (int) $wali['kelas_id'];
 
 $tahun_ajaran_id = $wali_tahun_ajaran_id;
 $kelas_id = $wali_kelas_id;
+
 $siswa_id = isset($_GET['siswa_id']) ? (int) $_GET['siswa_id'] : 0;
-$tanggal = isset($_GET['tanggal']) ? trim($_GET['tanggal']) : '';
+$tanggal_mulai = isset($_GET['tanggal_mulai']) ? trim($_GET['tanggal_mulai']) : '';
+$tanggal_sampai = isset($_GET['tanggal_sampai']) ? trim($_GET['tanggal_sampai']) : '';
 
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 
@@ -68,8 +70,30 @@ $per_page = 10;
 $offset = ($page - 1) * $per_page;
 
 // Validasi tanggal
-if ($tanggal != '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) {
-    $tanggal = '';
+if ($tanggal_mulai != '') {
+    $date_mulai = DateTime::createFromFormat('!Y-m-d', $tanggal_mulai);
+
+    if (!$date_mulai || $date_mulai->format('Y-m-d') !== $tanggal_mulai) {
+        $tanggal_mulai = '';
+    }
+}
+
+if ($tanggal_sampai != '') {
+    $date_sampai = DateTime::createFromFormat('!Y-m-d', $tanggal_sampai);
+
+    if (!$date_sampai || $date_sampai->format('Y-m-d') !== $tanggal_sampai) {
+        $tanggal_sampai = '';
+    }
+}
+
+// Jika tanggal mulai lebih besar dari tanggal akhir
+if (
+    $tanggal_mulai != '' &&
+    $tanggal_sampai != '' &&
+    $tanggal_mulai > $tanggal_sampai
+) {
+    $tanggal_mulai = '';
+    $tanggal_sampai = '';
 }
 
 // Laporan hanya untuk kelas yang sedang diwalikan
@@ -82,9 +106,16 @@ if ($siswa_id > 0) {
     $where .= " AND ps.siswa_id = $siswa_id";
 }
 
-if ($tanggal != '') {
-    $tanggal_sql = mysqli_real_escape_string($conn, $tanggal);
-    $where .= " AND DATE(ps.tanggal) = '$tanggal_sql'";
+// Filter tanggal mulai
+if ($tanggal_mulai != '') {
+    $tanggal_mulai_sql = mysqli_real_escape_string($conn, $tanggal_mulai);
+    $where .= " AND ps.tanggal >= '$tanggal_mulai_sql'";
+}
+
+// Filter tanggal sampai
+if ($tanggal_sampai != '') {
+    $tanggal_sampai_sql = mysqli_real_escape_string($conn, $tanggal_sampai);
+    $where .= " AND ps.tanggal <= '$tanggal_sampai_sql'";
 }
 
 // Data dropdown
@@ -171,6 +202,7 @@ if (!$query) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan - Sistem Pelanggaran Siswa</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
@@ -233,15 +265,24 @@ if (!$query) {
                 margin-left: 25%;
             }
         }
+
+        @media (max-width: 767.98px) {
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 
 <body>
 <div class="container-fluid">
     <div class="row">
+
         <?php require_once "../../layout/sidebar.php"; ?>
 
         <main class="col-md-9 col-lg-10 main-content">
+
             <div class="mb-4">
                 <h1 class="fw-bold mb-1">Laporan Pelanggaran</h1>
                 <p class="text-muted mb-0">
@@ -249,7 +290,9 @@ if (!$query) {
                 </p>
             </div>
 
+            <!-- Statistik -->
             <div class="row g-3 mb-4">
+
                 <div class="col-md-6">
                     <div class="card stat-card shadow-sm h-100">
                         <div class="card-body d-flex align-items-center gap-3">
@@ -277,14 +320,18 @@ if (!$query) {
                         </div>
                     </div>
                 </div>
+
             </div>
 
+            <!-- Filter Laporan -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
+
                     <form method="GET" class="row g-3">
+
                         <div class="col-md-3">
                             <label class="form-label">Tahun Ajaran</label>
-                            <select name="tahun_ajaran_id" class="form-select" disabled>
+                            <select class="form-select" disabled>
                                 <?php while ($ta = mysqli_fetch_assoc($tahun_ajaran)) { ?>
                                     <option value="<?= $ta['id']; ?>" selected>
                                         <?= htmlspecialchars($ta['nama']); ?>
@@ -295,7 +342,7 @@ if (!$query) {
 
                         <div class="col-md-3">
                             <label class="form-label">Kelas</label>
-                            <select name="kelas_id" class="form-select" disabled>
+                            <select class="form-select" disabled>
                                 <?php while ($k = mysqli_fetch_assoc($kelas)) { ?>
                                     <option value="<?= $k['id']; ?>" selected>
                                         <?= htmlspecialchars($k['nama']); ?>
@@ -308,8 +355,10 @@ if (!$query) {
                             <label class="form-label">Siswa</label>
                             <select name="siswa_id" class="form-select">
                                 <option value="0">Semua Siswa</option>
+
                                 <?php while ($s = mysqli_fetch_assoc($siswa)) { ?>
-                                    <option value="<?= $s['id']; ?>" <?= ($siswa_id == $s['id']) ? 'selected' : ''; ?>>
+                                    <option value="<?= $s['id']; ?>"
+                                        <?= ($siswa_id == $s['id']) ? 'selected' : ''; ?>>
                                         <?= htmlspecialchars($s['nama']); ?>
                                     </option>
                                 <?php } ?>
@@ -317,57 +366,95 @@ if (!$query) {
                         </div>
 
                         <div class="col-md-3">
-                            <label class="form-label">Tanggal</label>
-                            <input type="date" name="tanggal" class="form-control"
-                                   value="<?= htmlspecialchars($tanggal); ?>">
+                            <label class="form-label">Dari Tanggal</label>
+                            <input
+                                type="date"
+                                name="tanggal_mulai"
+                                class="form-control"
+                                value="<?= htmlspecialchars($tanggal_mulai); ?>"
+                                max="<?= htmlspecialchars($tanggal_sampai ?: ''); ?>"
+                            >
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Sampai Tanggal</label>
+                            <input
+                                type="date"
+                                name="tanggal_sampai"
+                                class="form-control"
+                                value="<?= htmlspecialchars($tanggal_sampai); ?>"
+                                min="<?= htmlspecialchars($tanggal_mulai ?: ''); ?>"
+                            >
                         </div>
 
                         <div class="col-12 d-flex align-items-end gap-2">
+
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-search"></i> Cari
                             </button>
+
                             <a href="index.php" class="btn btn-secondary">
                                 <i class="bi bi-arrow-clockwise"></i> Reset
                             </a>
+
                         </div>
+
                     </form>
+
                 </div>
             </div>
 
+            <!-- Tabel Laporan -->
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+
                         <div>
                             <h5 class="fw-bold mb-1">
                                 <i class="bi bi-file-earmark-text"></i>
                                 Data Laporan
                             </h5>
+
                             <small class="text-muted">
                                 Guru: <?= htmlspecialchars($guru['nama']); ?>
                             </small>
                         </div>
 
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 flex-wrap">
+
                             <a href="export_excel.php?<?= http_build_query([
                                 'siswa_id' => $siswa_id,
-                                'tanggal' => $tanggal
+                                'tanggal_mulai' => $tanggal_mulai,
+                                'tanggal_sampai' => $tanggal_sampai
                             ]); ?>" class="btn btn-success">
-                                <i class="bi bi-file-earmark-excel"></i> Export Excel
+
+                                <i class="bi bi-file-earmark-excel"></i>
+                                Export Excel
+
                             </a>
 
                             <a href="cetak.php?<?= http_build_query([
                                 'tahun_ajaran_id' => $wali_tahun_ajaran_id,
                                 'kelas_id' => $wali_kelas_id,
                                 'siswa_id' => $siswa_id,
-                                'tanggal' => $tanggal
+                                'tanggal_mulai' => $tanggal_mulai,
+                                'tanggal_sampai' => $tanggal_sampai
                             ]); ?>" target="_blank" class="btn btn-dark">
-                                <i class="bi bi-printer"></i> Cetak
+
+                                <i class="bi bi-printer"></i>
+                                Cetak
+
                             </a>
+
                         </div>
+
                     </div>
 
                     <div class="table-responsive">
+
                         <table class="table table-bordered table-hover align-middle mb-0">
+
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -382,46 +469,79 @@ if (!$query) {
                             </thead>
 
                             <tbody>
+
                                 <?php if (mysqli_num_rows($query) > 0) { ?>
+
                                     <?php $no = $offset + 1; ?>
 
                                     <?php while ($data = mysqli_fetch_assoc($query)) { ?>
+
                                         <tr>
                                             <td><?= $no++; ?></td>
-                                            <td><?= date('d-m-Y', strtotime($data['tanggal'])); ?></td>
-                                            <td><?= htmlspecialchars($data['nama_siswa']); ?></td>
-                                            <td><?= htmlspecialchars($data['nama_kelas']); ?></td>
-                                            <td><?= htmlspecialchars($data['nama_pelanggaran']); ?></td>
+
+                                            <td>
+                                                <?= date('d-m-Y', strtotime($data['tanggal'])); ?>
+                                            </td>
+
+                                            <td>
+                                                <?= htmlspecialchars($data['nama_siswa']); ?>
+                                            </td>
+
+                                            <td>
+                                                <?= htmlspecialchars($data['nama_kelas']); ?>
+                                            </td>
+
+                                            <td>
+                                                <?= htmlspecialchars($data['nama_pelanggaran']); ?>
+                                            </td>
+
                                             <td>
                                                 <span class="badge bg-danger">
                                                     <?= (int) $data['poin']; ?>
                                                 </span>
                                             </td>
-                                            <td><?= htmlspecialchars($data['keterangan'] ?: '-'); ?></td>
-                                            <td><?= htmlspecialchars($data['tindakan'] ?: '-'); ?></td>
+
+                                            <td>
+                                                <?= htmlspecialchars($data['keterangan'] ?: '-'); ?>
+                                            </td>
+
+                                            <td>
+                                                <?= htmlspecialchars($data['tindakan'] ?: '-'); ?>
+                                            </td>
                                         </tr>
+
                                     <?php } ?>
 
                                 <?php } else { ?>
+
                                     <tr>
                                         <td colspan="8" class="text-center py-4 text-muted">
                                             <i class="bi bi-inbox fs-3 d-block mb-2"></i>
                                             Belum ada data pelanggaran.
                                         </td>
                                     </tr>
+
                                 <?php } ?>
+
                             </tbody>
+
                         </table>
+
                     </div>
 
+                    <!-- Pagination -->
                     <?php if ($total_pages > 1) { ?>
+
                         <div class="d-flex justify-content-end mt-3">
+
                             <nav>
                                 <ul class="pagination mb-0">
+
                                     <li class="page-item <?= ($page <= 1) ? 'disabled' : ''; ?>">
                                         <a class="page-link" href="?<?= http_build_query([
                                             'siswa_id' => $siswa_id,
-                                            'tanggal' => $tanggal,
+                                            'tanggal_mulai' => $tanggal_mulai,
+                                            'tanggal_sampai' => $tanggal_sampai,
                                             'page' => $page - 1
                                         ]); ?>">
                                             Sebelumnya
@@ -429,36 +549,46 @@ if (!$query) {
                                     </li>
 
                                     <?php for ($i = 1; $i <= $total_pages; $i++) { ?>
+
                                         <li class="page-item <?= ($page == $i) ? 'active' : ''; ?>">
                                             <a class="page-link" href="?<?= http_build_query([
                                                 'siswa_id' => $siswa_id,
-                                                'tanggal' => $tanggal,
+                                                'tanggal_mulai' => $tanggal_mulai,
+                                                'tanggal_sampai' => $tanggal_sampai,
                                                 'page' => $i
                                             ]); ?>">
                                                 <?= $i; ?>
                                             </a>
                                         </li>
+
                                     <?php } ?>
 
                                     <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : ''; ?>">
                                         <a class="page-link" href="?<?= http_build_query([
                                             'siswa_id' => $siswa_id,
-                                            'tanggal' => $tanggal,
+                                            'tanggal_mulai' => $tanggal_mulai,
+                                            'tanggal_sampai' => $tanggal_sampai,
                                             'page' => $page + 1
                                         ]); ?>">
                                             Berikutnya
                                         </a>
                                     </li>
+
                                 </ul>
                             </nav>
+
                         </div>
+
                     <?php } ?>
+
                 </div>
             </div>
+
         </main>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

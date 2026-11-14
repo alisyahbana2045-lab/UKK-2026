@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/../../config/admin.php";
 require_once __DIR__ . "/../../config/koneksi.php";
@@ -7,7 +8,7 @@ if (!isset($_GET['id'])) {
     exit;
 }
 
-$id = $_GET['id'];
+$id = (int) $_GET['id'];
 
 $query = mysqli_query($conn, "SELECT * FROM t_siswa WHERE id = '$id'");
 
@@ -19,22 +20,23 @@ if (!$query || mysqli_num_rows($query) == 0) {
 $siswa = mysqli_fetch_assoc($query);
 
 if (isset($_POST['update'])) {
-    $nis = $_POST['nis'];
-    $nisn = $_POST['nisn'];
-    $nama = $_POST['nama'];
-    $jenis_kelamin = $_POST['jenis_kelamin'];
-    $tanggal_lahir = $_POST['tanggal_lahir'];
-    $alamat = $_POST['alamat'];
-    $status_aktif = $_POST['status_aktif'];
+    $nis = mysqli_real_escape_string($conn, $_POST['nis']);
+    $nisn = mysqli_real_escape_string($conn, $_POST['nisn']);
+    $nama = mysqli_real_escape_string($conn, $_POST['nama']);
+    $jenis_kelamin = mysqli_real_escape_string($conn, $_POST['jenis_kelamin']);
+    $tanggal_lahir = mysqli_real_escape_string($conn, $_POST['tanggal_lahir']);
+    $alamat = mysqli_real_escape_string($conn, $_POST['alamat']);
+    $status_aktif = (int) $_POST['status_aktif'];
 
-    $update = mysqli_query($conn, "UPDATE t_siswa SET
-        nis = '$nis',
-        nisn = '$nisn',
-        nama = '$nama',
-        jenis_kelamin = '$jenis_kelamin',
-        tanggal_lahir = '$tanggal_lahir',
-        alamat = '$alamat',
-        status_aktif = '$status_aktif'
+    $update = mysqli_query($conn, "
+        UPDATE t_siswa SET
+            nis = '$nis',
+            nisn = '$nisn',
+            nama = '$nama',
+            jenis_kelamin = '$jenis_kelamin',
+            tanggal_lahir = '$tanggal_lahir',
+            alamat = '$alamat',
+            status_aktif = '$status_aktif'
         WHERE id = '$id'
     ");
 
@@ -42,8 +44,11 @@ if (isset($_POST['update'])) {
         header("Location: index.php");
         exit;
     } else {
-        echo "Data gagal diubah: " . mysqli_error($conn);
+        $error = "Data gagal diubah: " . mysqli_error($conn);
     }
+
+    $query = mysqli_query($conn, "SELECT * FROM t_siswa WHERE id = '$id'");
+    $siswa = mysqli_fetch_assoc($query);
 }
 ?>
 
@@ -54,9 +59,7 @@ if (isset($_POST['update'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Siswa</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-
     <style>
         .sidebar {
             position: fixed;
@@ -91,7 +94,6 @@ if (isset($_POST['update'])) {
         }
     </style>
 </head>
-
 <body>
 <div class="container-fluid">
     <div class="row">
@@ -105,6 +107,12 @@ if (isset($_POST['update'])) {
 
             <div class="card shadow-sm">
                 <div class="card-body">
+                    <?php if (isset($error)) : ?>
+                        <div class="alert alert-danger">
+                            <?= htmlspecialchars($error); ?>
+                        </div>
+                    <?php endif; ?>
+
                     <form method="POST">
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -129,12 +137,8 @@ if (isset($_POST['update'])) {
                                 <label class="form-label">Jenis Kelamin</label>
                                 <select name="jenis_kelamin" class="form-select" required>
                                     <option value="">-- Pilih Jenis Kelamin --</option>
-                                    <option value="L" <?= $siswa['jenis_kelamin'] == 'L' ? 'selected' : ''; ?>>
-                                        Laki-laki
-                                    </option>
-                                    <option value="P" <?= $siswa['jenis_kelamin'] == 'P' ? 'selected' : ''; ?>>
-                                        Perempuan
-                                    </option>
+                                    <option value="L" <?= $siswa['jenis_kelamin'] == 'L' ? 'selected' : ''; ?>>Laki-laki</option>
+                                    <option value="P" <?= $siswa['jenis_kelamin'] == 'P' ? 'selected' : ''; ?>>Perempuan</option>
                                 </select>
                             </div>
 
@@ -152,22 +156,17 @@ if (isset($_POST['update'])) {
                             <div class="col-md-6 mb-4">
                                 <label class="form-label">Status</label>
                                 <select name="status_aktif" class="form-select" required>
-                                    <option value="1" <?= $siswa['status_aktif'] == 1 ? 'selected' : ''; ?>>
-                                        Aktif
-                                    </option>
-                                    <option value="0" <?= $siswa['status_aktif'] == 0 ? 'selected' : ''; ?>>
-                                        Tidak Aktif
-                                    </option>
+                                    <option value="1" <?= $siswa['status_aktif'] == 1 ? 'selected' : ''; ?>>Aktif</option>
+                                    <option value="0" <?= $siswa['status_aktif'] == 0 ? 'selected' : ''; ?>>Tidak Aktif</option>
                                 </select>
                             </div>
                         </div>
 
                         <button type="submit" name="update" class="btn btn-primary">
-                            Simpan Perubahan
+                            <i class="bi bi-save"></i> Simpan Perubahan
                         </button>
-                        <a href="index.php" class="btn btn-secondary">
-                            Kembali
-                        </a>
+
+                        <a href="index.php" class="btn btn-secondary">Kembali</a>
                     </form>
                 </div>
             </div>
