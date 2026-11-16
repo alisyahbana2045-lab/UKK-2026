@@ -114,18 +114,33 @@ $query_ringkasan = mysqli_query($conn, "
     SELECT
         COUNT(DISTINCT ks.siswa_id) AS total_siswa,
         COUNT(DISTINCT CASE
-            WHEN ps.id IS NOT NULL THEN ks.siswa_id
+            WHEN COALESCE(ps.jumlah_pelanggaran, 0) > 0
+            THEN ks.siswa_id
         END) AS siswa_melanggar,
-        COUNT(DISTINCT ps.id) AS total_pelanggaran,
-        COALESCE(SUM(ps.poin), 0) AS total_poin
-    FROM t_kelas_siswa ks
-    LEFT JOIN t_pelanggaran_siswa ps
+        COALESCE(SUM(COALESCE(ps.jumlah_pelanggaran, 0)), 0) AS total_pelanggaran,
+        COALESCE(SUM(COALESCE(ps.total_poin, 0)), 0) AS total_poin
+    FROM (
+        SELECT DISTINCT siswa_id, tahun_ajaran_id, kelas_id
+        FROM t_kelas_siswa
+        WHERE tahun_ajaran_id = $tahun_ajaran_id
+        AND kelas_id IN ($kelas_id_sql)
+        AND status_aktif = 1
+    ) ks
+    LEFT JOIN (
+        SELECT
+            siswa_id,
+            tahun_ajaran_id,
+            kelas_id,
+            COUNT(*) AS jumlah_pelanggaran,
+            SUM(poin) AS total_poin
+        FROM t_pelanggaran_siswa
+        WHERE tahun_ajaran_id = $tahun_ajaran_id
+        AND kelas_id IN ($kelas_id_sql)
+        GROUP BY siswa_id, tahun_ajaran_id, kelas_id
+    ) ps
         ON ps.siswa_id = ks.siswa_id
         AND ps.tahun_ajaran_id = ks.tahun_ajaran_id
         AND ps.kelas_id = ks.kelas_id
-    WHERE ks.tahun_ajaran_id = $tahun_ajaran_id
-    AND ks.kelas_id IN ($kelas_id_sql)
-    AND ks.status_aktif = 1
 ");
 
 if (!$query_ringkasan) {
@@ -144,19 +159,32 @@ $query_rekap = mysqli_query($conn, "
         s.nis,
         s.nama,
         k.nama AS nama_kelas,
-        COUNT(DISTINCT ps.id) AS jumlah_pelanggaran,
-        COALESCE(SUM(ps.poin), 0) AS total_poin
-    FROM t_kelas_siswa ks
+        COALESCE(ps.jumlah_pelanggaran, 0) AS jumlah_pelanggaran,
+        COALESCE(ps.total_poin, 0) AS total_poin
+    FROM (
+        SELECT DISTINCT siswa_id, tahun_ajaran_id, kelas_id
+        FROM t_kelas_siswa
+        WHERE tahun_ajaran_id = $tahun_ajaran_id
+        AND kelas_id IN ($kelas_id_sql)
+        AND status_aktif = 1
+    ) ks
     INNER JOIN t_siswa s ON ks.siswa_id = s.id
     INNER JOIN t_kelas k ON ks.kelas_id = k.id
-    LEFT JOIN t_pelanggaran_siswa ps
+    LEFT JOIN (
+        SELECT
+            siswa_id,
+            tahun_ajaran_id,
+            kelas_id,
+            COUNT(*) AS jumlah_pelanggaran,
+            SUM(poin) AS total_poin
+        FROM t_pelanggaran_siswa
+        WHERE tahun_ajaran_id = $tahun_ajaran_id
+        AND kelas_id IN ($kelas_id_sql)
+        GROUP BY siswa_id, tahun_ajaran_id, kelas_id
+    ) ps
         ON ps.siswa_id = ks.siswa_id
         AND ps.tahun_ajaran_id = ks.tahun_ajaran_id
         AND ps.kelas_id = ks.kelas_id
-    WHERE ks.tahun_ajaran_id = $tahun_ajaran_id
-    AND ks.kelas_id IN ($kelas_id_sql)
-    AND ks.status_aktif = 1
-    GROUP BY s.id, s.nis, s.nama, k.nama
     ORDER BY k.nama ASC, s.nama ASC
 ");
 
@@ -271,7 +299,7 @@ if (!$query_rekap) {
                         <div class="card-body">
                             <div class="text-muted mb-2">Total Siswa</div>
                             <h3 class="fw-bold mb-0">
-                                <?= $ringkasan['total_siswa']; ?>
+                                <?= (int) $ringkasan['total_siswa']; ?>
                             </h3>
                             <i class="bi bi-people-fill text-primary"></i>
                         </div>
@@ -283,7 +311,7 @@ if (!$query_rekap) {
                         <div class="card-body">
                             <div class="text-muted mb-2">Siswa Melanggar</div>
                             <h3 class="fw-bold mb-0">
-                                <?= $ringkasan['siswa_melanggar']; ?>
+                                <?= (int) $ringkasan['siswa_melanggar']; ?>
                             </h3>
                             <i class="bi bi-person-exclamation text-warning"></i>
                         </div>
@@ -295,7 +323,7 @@ if (!$query_rekap) {
                         <div class="card-body">
                             <div class="text-muted mb-2">Jumlah Pelanggaran</div>
                             <h3 class="fw-bold mb-0">
-                                <?= $ringkasan['total_pelanggaran']; ?>
+                                <?= (int) $ringkasan['total_pelanggaran']; ?>
                             </h3>
                             <i class="bi bi-exclamation-triangle-fill text-danger"></i>
                         </div>
@@ -307,7 +335,7 @@ if (!$query_rekap) {
                         <div class="card-body">
                             <div class="text-muted mb-2">Total Poin</div>
                             <h3 class="fw-bold mb-0">
-                                <?= $ringkasan['total_poin']; ?>
+                                <?= (int) $ringkasan['total_poin']; ?>
                             </h3>
                             <i class="bi bi-bar-chart-fill text-success"></i>
                         </div>
@@ -384,7 +412,7 @@ if (!$query_rekap) {
                                         <td><?= htmlspecialchars($row['nis']); ?></td>
                                         <td><?= htmlspecialchars($row['nama']); ?></td>
                                         <td><?= htmlspecialchars($row['nama_kelas']); ?></td>
-                                        <td><?= $row['jumlah_pelanggaran']; ?></td>
+                                        <td><?= (int) $row['jumlah_pelanggaran']; ?></td>
 
                                         <td>
                                             <span class="badge text-bg-danger">

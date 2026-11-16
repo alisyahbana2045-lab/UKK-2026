@@ -3,9 +3,9 @@
 require_once __DIR__ . "/../../config/session.php";
 require_once __DIR__ . "/../../config/koneksi.php";
 
-$user_id = $_SESSION['user_id'];
+$user_id = (int) $_SESSION['user_id'];
 
-$cari = isset($_GET['cari']) ? mysqli_real_escape_string($conn, $_GET['cari']) : '';
+$cari = isset($_GET['cari']) ? mysqli_real_escape_string($conn, trim($_GET['cari'])) : '';
 
 $per_page = 10;
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
@@ -21,18 +21,23 @@ if ($cari != '') {
     $where .= " AND (
         s.nama LIKE '%$cari%'
         OR s.nis LIKE '%$cari%'
-        OR k.nama LIKE '%$cari%'
+        OR k.nama_kelas LIKE '%$cari%'
     )";
 }
 
 // Hitung jumlah siswa
 $query_jumlah = mysqli_query($conn, "
-    SELECT COUNT(DISTINCT s.id) AS total
+    SELECT COUNT(*) AS total
     FROM t_siswa s
-    LEFT JOIN t_kelas_siswa ks
-        ON ks.siswa_id = s.id
-    LEFT JOIN t_kelas k
-        ON k.id = ks.kelas_id
+    LEFT JOIN (
+        SELECT
+            ks.siswa_id,
+            GROUP_CONCAT(DISTINCT k.nama ORDER BY k.nama SEPARATOR ', ') AS nama_kelas
+        FROM t_kelas_siswa ks
+        LEFT JOIN t_kelas k ON k.id = ks.kelas_id
+        WHERE ks.status_aktif = 1
+        GROUP BY ks.siswa_id
+    ) k ON k.siswa_id = s.id
     $where
 ");
 
@@ -40,8 +45,8 @@ if (!$query_jumlah) {
     die("Query jumlah gagal: " . mysqli_error($conn));
 }
 
-$total_data = mysqli_fetch_assoc($query_jumlah)['total'];
-$total_halaman = ceil($total_data / $per_page);
+$total_data = (int) mysqli_fetch_assoc($query_jumlah)['total'];
+$total_halaman = (int) ceil($total_data / $per_page);
 
 if ($total_halaman > 0 && $page > $total_halaman) {
     $page = $total_halaman;
@@ -55,18 +60,31 @@ $query = mysqli_query($conn, "
         s.id,
         s.nis,
         s.nama,
-        COALESCE(GROUP_CONCAT(DISTINCT k.nama ORDER BY k.nama SEPARATOR ', '), '-') AS nama_kelas,
-        COUNT(DISTINCT ps.id) AS jumlah_pelanggaran,
-        COALESCE(SUM(ps.poin), 0) AS total_poin
+        COALESCE(k.nama_kelas, '-') AS nama_kelas,
+        COALESCE(r.jumlah_pelanggaran, 0) AS jumlah_pelanggaran,
+        COALESCE(r.total_poin, 0) AS total_poin
     FROM t_siswa s
-    LEFT JOIN t_kelas_siswa ks
-        ON ks.siswa_id = s.id
-    LEFT JOIN t_kelas k
-        ON k.id = ks.kelas_id
-    LEFT JOIN t_pelanggaran_siswa ps
-        ON ps.siswa_id = s.id
+
+    LEFT JOIN (
+        SELECT
+            ks.siswa_id,
+            GROUP_CONCAT(DISTINCT k.nama ORDER BY k.nama SEPARATOR ', ') AS nama_kelas
+        FROM t_kelas_siswa ks
+        LEFT JOIN t_kelas k ON k.id = ks.kelas_id
+        WHERE ks.status_aktif = 1
+        GROUP BY ks.siswa_id
+    ) k ON k.siswa_id = s.id
+
+    LEFT JOIN (
+        SELECT
+            siswa_id,
+            COUNT(*) AS jumlah_pelanggaran,
+            SUM(poin) AS total_poin
+        FROM t_pelanggaran_siswa
+        GROUP BY siswa_id
+    ) r ON r.siswa_id = s.id
+
     $where
-    GROUP BY s.id, s.nis, s.nama
     ORDER BY total_poin DESC, s.nama ASC
     LIMIT $offset, $per_page
 ");
@@ -84,6 +102,7 @@ if (!$query) {
     <title>Rekap Poin - Sistem Pelanggaran Siswa</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
     <style>
         .sidebar {
             position: fixed;
@@ -181,7 +200,7 @@ if (!$query) {
                                         <td><?= htmlspecialchars($data['nama_kelas']); ?></td>
                                         <td><?= (int) $data['jumlah_pelanggaran']; ?></td>
                                         <td>
-                                            <?php if ($data['total_poin'] > 0) { ?>
+                                            <?php if ((int) $data['total_poin'] > 0) { ?>
                                                 <span class="badge bg-danger">
                                                     <?= (int) $data['total_poin']; ?> Poin
                                                 </span>

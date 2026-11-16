@@ -707,13 +707,13 @@ new Chart(ctx, {
         datasets: [{
             label: 'Pelanggaran',
             data: <?= json_encode($chart_data); ?>,
-            borderColor: '#0d6efd',
-            backgroundColor: 'rgba(13, 110, 253, 0.15)',
+            borderColor: '#fd0d0d',
+            backgroundColor: 'rgba(253, 13, 13, 0.15)',
             borderWidth: 3,
             fill: true,
             tension: 0.4,
             pointRadius: 4,
-            pointBackgroundColor: '#0d6efd'
+            pointBackgroundColor: '#fd0d0d'
         }]
     },
     options: {

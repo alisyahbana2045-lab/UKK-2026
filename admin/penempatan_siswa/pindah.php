@@ -31,6 +31,7 @@ $stmt = mysqli_prepare($conn, "
         s.nama AS nama_siswa,
         s.status_aktif AS status_siswa,
         k.nama AS nama_kelas,
+        k.tingkat AS tingkat_kelas,
         ta.nama AS tahun_ajaran
     FROM t_kelas_siswa ks
     JOIN t_siswa s ON ks.siswa_id = s.id
@@ -66,17 +67,25 @@ if ($data['status_siswa'] != 1) {
 
 // ================================
 // DATA KELAS TUJUAN
+// HANYA TINGKAT YANG SAMA
 // ================================
 
 $query_kelas = mysqli_prepare($conn, "
-    SELECT id, nama
+    SELECT id, nama, tingkat
     FROM t_kelas
     WHERE status_aktif = 1
+    AND tingkat = ?
     AND id != ?
     ORDER BY nama ASC
 ");
 
-mysqli_stmt_bind_param($query_kelas, "i", $data['kelas_id']);
+mysqli_stmt_bind_param(
+    $query_kelas,
+    "si",
+    $data['tingkat_kelas'],
+    $data['kelas_id']
+);
+
 mysqli_stmt_execute($query_kelas);
 
 $result_kelas = mysqli_stmt_get_result($query_kelas);
@@ -87,8 +96,8 @@ $result_kelas = mysqli_stmt_get_result($query_kelas);
 
 if (isset($_POST['pindah'])) {
 
-    $kelas_baru = (int) $_POST['kelas_id'];
-    $tanggal_pindah = $_POST['tanggal_pindah'];
+    $kelas_baru = isset($_POST['kelas_id']) ? (int) $_POST['kelas_id'] : 0;
+    $tanggal_pindah = trim($_POST['tanggal_pindah'] ?? '');
 
     if ($kelas_baru <= 0 || empty($tanggal_pindah)) {
 
@@ -97,6 +106,13 @@ if (isset($_POST['pindah'])) {
     } elseif ($kelas_baru == $data['kelas_id']) {
 
         $error = "Kelas tujuan tidak boleh sama dengan kelas saat ini.";
+
+    } elseif (
+        !DateTime::createFromFormat('!Y-m-d', $tanggal_pindah) ||
+        DateTime::createFromFormat('!Y-m-d', $tanggal_pindah)->format('Y-m-d') !== $tanggal_pindah
+    ) {
+
+        $error = "Format tanggal pindah tidak valid.";
 
     } elseif ($tanggal_pindah < $data['tanggal_mulai']) {
 
@@ -115,9 +131,12 @@ if (isset($_POST['pindah'])) {
 
         try {
 
-            // CEK KELAS TUJUAN
+            // ================================
+            // CEK KELAS TUJUAN DAN TINGKAT
+            // ================================
+
             $cek_kelas = mysqli_prepare($conn, "
-                SELECT id
+                SELECT id, tingkat
                 FROM t_kelas
                 WHERE id = ?
                 AND status_aktif = 1
@@ -126,15 +145,28 @@ if (isset($_POST['pindah'])) {
 
             mysqli_stmt_bind_param($cek_kelas, "i", $kelas_baru);
             mysqli_stmt_execute($cek_kelas);
-            mysqli_stmt_store_result($cek_kelas);
 
-            if (mysqli_stmt_num_rows($cek_kelas) == 0) {
-                throw new Exception("Kelas tujuan tidak ditemukan atau tidak aktif.");
-            }
+            $result_cek_kelas = mysqli_stmt_get_result($cek_kelas);
+            $kelas_tujuan = mysqli_fetch_assoc($result_cek_kelas);
 
             mysqli_stmt_close($cek_kelas);
 
+            if (!$kelas_tujuan) {
+                throw new Exception("Kelas tujuan tidak ditemukan atau tidak aktif.");
+            }
+
+            // Pastikan tingkat kelas sama
+            if ($kelas_tujuan['tingkat'] !== $data['tingkat_kelas']) {
+                throw new Exception(
+                    "Siswa hanya boleh pindah ke kelas dengan tingkat yang sama. " .
+                    "Tingkat saat ini: " . $data['tingkat_kelas'] . "."
+                );
+            }
+
+            // ================================
             // CEK PENEMPATAN AKTIF LAIN
+            // ================================
+
             $cek_aktif = mysqli_prepare($conn, "
                 SELECT id
                 FROM t_kelas_siswa
@@ -157,12 +189,16 @@ if (isset($_POST['pindah'])) {
             mysqli_stmt_store_result($cek_aktif);
 
             if (mysqli_stmt_num_rows($cek_aktif) > 0) {
+                mysqli_stmt_close($cek_aktif);
                 throw new Exception("Siswa sudah memiliki penempatan aktif lain pada tahun ajaran ini.");
             }
 
             mysqli_stmt_close($cek_aktif);
 
+            // ================================
             // NONAKTIFKAN KELAS LAMA
+            // ================================
+
             $update = mysqli_prepare($conn, "
                 UPDATE t_kelas_siswa
                 SET tanggal_selesai = ?,
@@ -179,16 +215,21 @@ if (isset($_POST['pindah'])) {
             );
 
             if (!mysqli_stmt_execute($update)) {
+                mysqli_stmt_close($update);
                 throw new Exception("Gagal memperbarui kelas lama.");
             }
 
             if (mysqli_stmt_affected_rows($update) != 1) {
+                mysqli_stmt_close($update);
                 throw new Exception("Penempatan lama sudah berubah. Silakan muat ulang halaman.");
             }
 
             mysqli_stmt_close($update);
 
+            // ================================
             // TAMBAHKAN PENEMPATAN KELAS BARU
+            // ================================
+
             $tanggal_selesai_baru = $data['tanggal_selesai'];
 
             $insert = mysqli_prepare($conn, "
@@ -215,12 +256,16 @@ if (isset($_POST['pindah'])) {
             );
 
             if (!mysqli_stmt_execute($insert)) {
+                mysqli_stmt_close($insert);
                 throw new Exception("Gagal menyimpan penempatan kelas baru.");
             }
 
             mysqli_stmt_close($insert);
 
+            // ================================
             // SIMPAN TRANSAKSI
+            // ================================
+
             mysqli_commit($conn);
 
             echo "<script>
@@ -293,7 +338,7 @@ if (isset($_POST['pindah'])) {
 
             <div class="mb-4">
                 <h1 class="fw-bold">Pindah Kelas Siswa</h1>
-                <p class="text-muted">Pindahkan siswa ke kelas yang baru</p>
+                <p class="text-muted">Pindahkan siswa ke kelas dengan tingkat yang sama.</p>
             </div>
 
             <div class="card shadow-sm">
@@ -331,10 +376,17 @@ if (isset($_POST['pindah'])) {
                             </div>
                         </div>
 
-                        <div class="row">
+                        <div class="row mb-2">
                             <div class="col-md-3 fw-semibold">Kelas Saat Ini</div>
                             <div class="col-md-9">
                                 <?= htmlspecialchars($data['nama_kelas']); ?>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 fw-semibold">Tingkat</div>
+                            <div class="col-md-9">
+                                <?= htmlspecialchars($data['tingkat_kelas']); ?>
                             </div>
                         </div>
                     </div>
@@ -358,6 +410,10 @@ if (isset($_POST['pindah'])) {
                                 <?php } ?>
 
                             </select>
+
+                            <small class="text-muted">
+                                Hanya kelas tingkat <?= htmlspecialchars($data['tingkat_kelas']); ?> yang dapat dipilih.
+                            </small>
                         </div>
 
                         <!-- TANGGAL PINDAH -->

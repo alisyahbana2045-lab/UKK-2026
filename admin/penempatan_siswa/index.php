@@ -241,7 +241,7 @@ if (!$query) {
 
                                                 <a
                                                     href="pindah.php?id=<?= $siswa['id']; ?>"
-                                                    class="btn btn-warning btn-sm"
+                                                    class="badge btn btn-warning btn-sm"
                                                 >
                                                     <i class="bi bi-arrow-left-right"></i>
                                                     Pindah Kelas

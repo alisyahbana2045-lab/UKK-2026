@@ -16,7 +16,7 @@ if ($siswa_id <= 0 || $tahun_ajaran_id <= 0) {
     die("Parameter tidak valid.");
 }
 
-// Ambil data guru
+// Mengambil data guru
 $stmt = mysqli_prepare($conn, "
     SELECT id, nama
     FROM t_guru
@@ -35,7 +35,7 @@ if (!$guru) {
 
 $guru_id = (int) $guru['id'];
 
-// Pastikan guru merupakan wali kelas pada tahun ajaran tersebut
+// Memastikan guru merupakan wali kelas
 $stmt = mysqli_prepare($conn, "
     SELECT wk.kelas_id, k.nama AS nama_kelas, ta.nama AS nama_tahun_ajaran
     FROM t_wali_kelas wk
@@ -58,7 +58,7 @@ if (!$wali) {
 
 $kelas_id = (int) $wali['kelas_id'];
 
-// Ambil data siswa berdasarkan penempatan kelas
+// Mengambil data siswa
 $stmt = mysqli_prepare($conn, "
     SELECT s.id, s.nis, s.nisn, s.nama, s.jenis_kelamin,
            k.nama AS nama_kelas
@@ -81,7 +81,7 @@ if (!$siswa) {
     die("Data siswa tidak ditemukan atau bukan bagian dari kelas Anda.");
 }
 
-// Hitung total poin dan jumlah pelanggaran
+// Menghitung total poin
 $stmt = mysqli_prepare($conn, "
     SELECT COALESCE(SUM(poin), 0) AS total_poin,
            COUNT(*) AS jumlah_pelanggaran
@@ -102,8 +102,7 @@ if ($total_poin < 50) {
     die("Surat pemanggilan hanya dapat dibuat untuk siswa dengan minimal 50 poin.");
 }
 
-// Ambil riwayat pelanggaran
-// Nama pelanggaran sudah tersimpan langsung di t_pelanggaran_siswa
+// Mengambil riwayat pelanggaran
 $stmt = mysqli_prepare($conn, "
     SELECT tanggal, nama_pelanggaran, poin, keterangan
     FROM t_pelanggaran_siswa
@@ -122,7 +121,7 @@ while ($row = mysqli_fetch_assoc($result_riwayat)) {
 }
 mysqli_stmt_close($stmt);
 
-// Proses data pertemuan
+// Data pertemuan
 $error = "";
 $tanggal_pertemuan = "";
 $waktu_pertemuan = "";
@@ -190,20 +189,50 @@ $tanggal_surat = date('Y-m-d');
     <style>
         body {
             background: #f4f6f9;
+            overflow-x: hidden;
         }
 
         .main-content {
-            margin-left: 260px;
-            padding: 25px;
+            margin-left: 16.666667%;
+            width: 83.333333%;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        .page-header {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: 65px;
+            margin-bottom: 25px;
+        }
+
+        .page-header h4 {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .page-header p {
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .btn-kembali {
+            position: absolute;
+            right: 0;
+            top: 0;
         }
 
         .form-card {
             max-width: 750px;
+            width: 100%;
             margin: 20px auto;
             background: white;
             padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,.06);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
         }
 
         .surat {
@@ -270,10 +299,32 @@ $tanggal_surat = date('Y-m-d');
             vertical-align: top;
         }
 
+        @media (max-width: 991.98px) {
+            .main-content {
+                margin-left: 25%;
+                width: 75%;
+                padding: 20px;
+            }
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 margin-left: 0;
-                padding: 12px;
+                width: 100%;
+                padding: 15px;
+            }
+
+            .page-header {
+                padding-top: 55px;
+            }
+
+            .btn-kembali {
+                right: 0;
+                top: 0;
+            }
+
+            .form-card {
+                padding: 18px;
             }
 
             .surat {
@@ -298,6 +349,7 @@ $tanggal_surat = date('Y-m-d');
 
             .main-content {
                 margin: 0 !important;
+                width: 100% !important;
                 padding: 0 !important;
             }
 
@@ -318,26 +370,31 @@ $tanggal_surat = date('Y-m-d');
         }
     </style>
 </head>
+
 <body>
 
 <div class="no-print">
     <?php include __DIR__ . "/../../layout/sidebar.php"; ?>
 </div>
 
-<div class="main-content">
+<main class="main-content">
 
     <div class="no-print">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-                <h4 class="fw-bold mb-1">Surat Pemanggilan Orang Tua</h4>
-                <p class="text-muted mb-0">Atur jadwal pertemuan sebelum mencetak surat.</p>
+
+        <!-- Header -->
+        <div class="page-header">
+            <div class="w-100">
+                <h4>Surat Pemanggilan Orang Tua</h4>
+                <p>Atur jadwal pertemuan sebelum mencetak surat.</p>
             </div>
+
             <a href="index.php?tahun_ajaran_id=<?= $tahun_ajaran_id; ?>"
-               class="btn btn-secondary">
+               class="btn btn-secondary btn-kembali">
                 <i class="bi bi-arrow-left"></i> Kembali
             </a>
         </div>
 
+        <!-- Form Pertemuan -->
         <div class="form-card">
             <h5 class="fw-bold mb-3">Data Pertemuan</h5>
 
@@ -362,7 +419,8 @@ $tanggal_surat = date('Y-m-d');
             <form method="POST">
                 <div class="mb-3">
                     <label class="form-label">Tanggal Pertemuan</label>
-                    <input type="date" name="tanggal_pertemuan"
+                    <input type="date"
+                           name="tanggal_pertemuan"
                            class="form-control"
                            min="<?= date('Y-m-d'); ?>"
                            value="<?= htmlspecialchars($tanggal_pertemuan); ?>"
@@ -371,7 +429,8 @@ $tanggal_surat = date('Y-m-d');
 
                 <div class="mb-3">
                     <label class="form-label">Waktu Pertemuan</label>
-                    <input type="time" name="waktu_pertemuan"
+                    <input type="time"
+                           name="waktu_pertemuan"
                            class="form-control"
                            value="<?= htmlspecialchars($waktu_pertemuan); ?>"
                            required>
@@ -379,7 +438,8 @@ $tanggal_surat = date('Y-m-d');
 
                 <div class="mb-3">
                     <label class="form-label">Tempat Pertemuan</label>
-                    <input type="text" name="tempat_pertemuan"
+                    <input type="text"
+                           name="tempat_pertemuan"
                            class="form-control"
                            value="<?= htmlspecialchars($tempat_pertemuan); ?>"
                            required>
@@ -401,6 +461,7 @@ $tanggal_surat = date('Y-m-d');
             </button>
         </div>
 
+        <!-- Isi Surat -->
         <div class="surat">
 
             <div class="kop-surat">
@@ -513,6 +574,7 @@ $tanggal_surat = date('Y-m-d');
                 </tr>
             </table>
 
+            <!-- Lampiran Riwayat Pelanggaran -->
             <div style="page-break-before: always;">
                 <h4 class="text-center mt-4 mb-3">
                     LAMPIRAN RIWAYAT PELANGGARAN SISWA
@@ -565,7 +627,7 @@ $tanggal_surat = date('Y-m-d');
         </div>
     <?php } ?>
 
-</div>
+</main>
 
 </body>
 </html>
