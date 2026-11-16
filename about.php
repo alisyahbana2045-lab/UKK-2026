@@ -211,8 +211,8 @@ require_once "config/session.php";
                                 </div>
 
                                 <div>
-                                    <small class="text-muted">Nama</small>
-                                    <h5 class="mb-0 fw-bold">Ali Syahbana</h5>
+                                    <small class="text-muted">Nama Lengkap</small>
+                                    <h5 class="mb-0 fw-bold">Mohammad Atalarik Ali Syahbana</h5>
                                 </div>
                             </div>
 
