@@ -25,7 +25,7 @@ if (isset($_SESSION['user_id'])) {
 
 <div class="card p-4 shadow" style="width: 350px;">
 
-    <h3 class="text-center mb-4">Login</h3>
+    <h3 class="text-center mb-4"><b>Login SPSMU</b></h3>
         <?php
     if (isset($_GET['pesan'])) {
 

@@ -293,14 +293,6 @@ if ($_SESSION['user_role'] == 'guru') {
                 </a>
             </li>
 
-            <li class="nav-item mb-2">
-                <a href="/UKK-2026/about.php"
-                   class="nav-link menu-sidebar <?= strpos($current_page, '/about.php') !== false ? 'active' : ''; ?>">
-                    <i class="bi bi-info-circle-fill"></i>
-                    <span>About</span>
-                </a>
-            </li>
-
             <hr>
 
             <li class="nav-item">

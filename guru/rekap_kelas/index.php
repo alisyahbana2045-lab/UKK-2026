@@ -360,8 +360,8 @@ if (!$query_rekap) {
                 <div class="card-body">
                     <h6 class="fw-bold mb-3">Keterangan Status Poin</h6>
 
-                    <span class="badge bg-success me-2 mb-1">Aman: 0–19</span>
-                    <span class="badge bg-warning text-dark me-2 mb-1">Peringatan: 20–49</span>
+                    <span class="badge bg-success me-2 mb-1">Safe: 0–19</span>
+                    <span class="badge bg-warning text-dark me-2 mb-1">Warning: 20–49</span>
                     <span class="badge bg-danger mb-1">Danger: 50+</span>
                 </div>
             </div>
@@ -397,10 +397,10 @@ if (!$query_rekap) {
                                         $poin = (int) $row['total_poin'];
 
                                         if ($poin < 20) {
-                                            $status = "Aman";
+                                            $status = "Safe";
                                             $warna = "bg-success";
                                         } elseif ($poin < 50) {
-                                            $status = "Peringatan";
+                                            $status = "Warning";
                                             $warna = "bg-warning text-dark";
                                         } else {
                                             $status = "Danger";

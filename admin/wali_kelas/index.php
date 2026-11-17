@@ -128,7 +128,7 @@ if (!$query) {
                 <div>
                     <h1 class="fw-bold mb-1">Kelola Wali Kelas</h1>
                     <p class="text-muted mb-0">
-                        Pengelolaan data wali kelas
+                        Penugasan guru menjadi walikelas
                     </p>
                 </div>
 
